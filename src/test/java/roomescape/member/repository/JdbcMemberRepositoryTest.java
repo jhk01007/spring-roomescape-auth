@@ -53,6 +53,39 @@ class JdbcMemberRepositoryTest {
     }
 
     @Test
+    @DisplayName("id로 회원을 조회한다.")
+    void findById() {
+        // given
+        Member saved = memberRepository.save(Member.user("login1", "password1", "닉네임"));
+
+        // when
+        Optional<Member> found = memberRepository.findById(saved.getId());
+
+        // then
+        assertThat(found).isPresent();
+        Member member = found.get();
+        assertThat(member)
+                .extracting(
+                        Member::getId,
+                        Member::getLoginId,
+                        Member::getPassword,
+                        Member::getNickname,
+                        Member::getRole
+                )
+                .containsExactly(saved.getId(), "login1", "password1", "닉네임", Role.USER);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id로 회원을 조회하면 빈 Optional을 반환한다.")
+    void findById_empty() {
+        // when
+        Optional<Member> found = memberRepository.findById(1L);
+
+        // then
+        assertThat(found).isEmpty();
+    }
+
+    @Test
     @DisplayName("로그인 아이디로 회원을 조회한다.")
     void findByLoginId() {
         // given
