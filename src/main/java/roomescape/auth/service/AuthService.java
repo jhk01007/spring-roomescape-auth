@@ -13,7 +13,7 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
 
-    public void login(String loginId, String password) {
+    public Member login(String loginId, String password) {
 
         Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new DomainException(MemberErrorCode.INVALID_LOGIN_CREDENTIALS));
@@ -22,5 +22,7 @@ public class AuthService {
         if(!member.isPasswordSame(password)) {
             throw new DomainException(MemberErrorCode.INVALID_LOGIN_CREDENTIALS);
         }
+
+        return member;
     }
 }

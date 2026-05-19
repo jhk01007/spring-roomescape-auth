@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.auth.CurrentUser;
+import roomescape.auth.annotation.LoginMember;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
@@ -37,7 +37,7 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationListResponse> getListByGuestName(@CurrentUser String guestName) {
+    public ResponseEntity<ReservationListResponse> getListByGuestName(@LoginMember String guestName) {
 
         List<Reservation> reservations = reservationService.findByGuestName(guestName);
 
@@ -51,7 +51,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> editDateTime(
             @PathVariable("id") Long id,
             @RequestBody @Valid ReservationEditRequest request,
-            @CurrentUser String guestName
+            @LoginMember String guestName
     ) {
         return ResponseEntity.ok(
                 ReservationResponse.from(
@@ -61,7 +61,7 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable("id") Long id,
-            @CurrentUser String guestName
+            @LoginMember String guestName
     ) {
         reservationService.deleteMine(id, guestName);
         return ResponseEntity.noContent().build();

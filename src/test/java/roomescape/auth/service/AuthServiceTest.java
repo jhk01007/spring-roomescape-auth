@@ -11,8 +11,7 @@ import roomescape.member.exception.MemberErrorCode;
 import roomescape.member.repository.JdbcMemberRepository;
 import roomescape.member.repository.MemberRepository;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 @JdbcTest
 @Import({
@@ -28,7 +27,7 @@ class AuthServiceTest {
     private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("로그인을 한다.")
+    @DisplayName("로그인에 성공하면 성공한 Member 객체를 반환한다.")
     public void login_success() {
         // given
         String loginId = "login1";
@@ -36,9 +35,16 @@ class AuthServiceTest {
         String nickname = "닉네임";
         memberRepository.save(Member.user(loginId, password, nickname));
 
-        // when then
-        assertThatCode(() -> authService.login(loginId, password))
-                .doesNotThrowAnyException();
+        // when
+        Member loginMember = authService.login(loginId, password);
+
+        // then
+        assertThat(loginMember)
+                .extracting(
+                        Member::getLoginId,
+                        Member::getPassword,
+                        Member::getNickname
+                ).containsExactly(loginId, password, nickname);
     }
 
     @Test

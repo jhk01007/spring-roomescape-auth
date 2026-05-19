@@ -25,7 +25,7 @@ import java.time.LocalTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static roomescape.auth.UserArgumentResolver.GUEST_NAME_HEADER;
+import static roomescape.auth.argumentResolver.CurrentUserArgumentResolver.GUEST_NAME_HEADER;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
