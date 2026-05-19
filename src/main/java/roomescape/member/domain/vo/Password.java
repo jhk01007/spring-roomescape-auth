@@ -1,18 +1,15 @@
-package roomescape.member.domain;
+package roomescape.member.domain.vo;
 
 import roomescape.common.exception.DomainException;
 
 import static roomescape.member.exception.MemberErrorCode.*;
 
-public class Password {
+public record Password(String password) {
     public static final int MIN_LENGTH = 8;
     public static final int MAX_LENGTH = 20;
 
-    private final String password;
-
-    public Password(String password) {
+    public Password {
         validate(password);
-        this.password = password;
     }
 
     private void validate(String password) {

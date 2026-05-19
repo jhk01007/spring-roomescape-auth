@@ -1,4 +1,4 @@
-package roomescape.member.domain;
+package roomescape.member.domain.vo;
 
 import roomescape.common.exception.DomainException;
 
@@ -6,16 +6,13 @@ import java.util.regex.Pattern;
 
 import static roomescape.member.exception.MemberErrorCode.*;
 
-public class Nickname {
+public record Nickname(String nickname) {
     public static final int MIN_LENGTH = 2;
     public static final int MAX_LENGTH = 10;
     public static final Pattern NICKNAME_PATTERN = Pattern.compile("^[가-힣a-zA-Z0-9_]+$");
 
-    private final String nickname;
-
-    public Nickname(String nickname) {
+    public Nickname {
         validate(nickname);
-        this.nickname = nickname;
     }
 
     private void validate(String nickname) {

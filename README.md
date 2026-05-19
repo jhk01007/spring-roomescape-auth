@@ -26,7 +26,7 @@
 **Request**
 
 ```http
-POST /auth/signup HTTP/1.1
+POST /members HTTP/1.1
 Content-Type: application/json
 
 {

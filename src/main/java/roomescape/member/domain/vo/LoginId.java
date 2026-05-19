@@ -1,4 +1,4 @@
-package roomescape.member.domain;
+package roomescape.member.domain.vo;
 
 import roomescape.common.exception.DomainException;
 
@@ -6,16 +6,13 @@ import java.util.regex.Pattern;
 
 import static roomescape.member.exception.MemberErrorCode.*;
 
-public class LoginId {
-    private final String loginId;
-
+public record LoginId(String loginId) {
     public static final int MIN_LENGTH = 4;
     public static final int MAX_LENGTH = 20;
     public static final Pattern LOGIN_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
 
-    public LoginId(String loginId) {
+    public LoginId {
         validate(loginId);
-        this.loginId = loginId;
     }
 
     private void validate(String loginId) {

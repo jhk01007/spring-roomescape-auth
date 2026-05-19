@@ -1,5 +1,12 @@
 package roomescape.member.domain;
 
+import lombok.Getter;
+import roomescape.member.domain.vo.LoginId;
+import roomescape.member.domain.vo.Nickname;
+import roomescape.member.domain.vo.Password;
+import roomescape.member.domain.vo.Role;
+
+@Getter
 public class Member {
 
     private Long id;
@@ -8,12 +15,35 @@ public class Member {
     private final Nickname nickname;
     private final Role role;
 
-    public Member(Long id, String nickname, String loginId, String password, Role role) {
+    private Member(Long id, LoginId loginId, Password password, Nickname nickname, Role role) {
         this.id = id;
-        this.nickname = new Nickname(nickname);
-        this.loginId = new LoginId(loginId);
-        this.password = new Password(password);
+        this.loginId = loginId;
+        this.password = password;
+        this.nickname = nickname;
         this.role = role;
     }
 
+    private Member(Long id, String loginId, String password, String nickname, Role role) {
+        this(id, new LoginId(loginId), new Password(password), new Nickname(nickname), role);
+    }
+
+    public static Member user(String loginId, String password, String nickname) {
+        return new Member(null, loginId, password, nickname, Role.USER);
+    }
+
+    public Member withId(Long id) {
+        return new Member(id, loginId, password, nickname, role);
+    }
+
+    public String getLoginId() {
+        return loginId.loginId();
+    }
+
+    public String getPassword() {
+        return password.password();
+    }
+
+    public String getNickname() {
+        return nickname.nickname();
+    }
 }
