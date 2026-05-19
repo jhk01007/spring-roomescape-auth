@@ -1,4 +1,4 @@
-package roomescape.common.auth;
+package roomescape.auth;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;

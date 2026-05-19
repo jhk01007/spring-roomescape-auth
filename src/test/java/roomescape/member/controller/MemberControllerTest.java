@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -15,6 +17,8 @@ import roomescape.member.controller.dto.MemberCreateRequest;
 import roomescape.member.controller.dto.MemberCreateResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
+
+import java.util.stream.Stream;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -73,5 +77,27 @@ class MemberControllerTest {
 
         then(memberService).should()
                 .signUp(loginId, password, nickname);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidMemberCreateRequests")
+    @DisplayName("회원가입 요청 바디에 필수값이 누락되면 실패한다.")
+    public void createMember_fail1(MemberCreateRequest request) throws Exception {
+        // when then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/members")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<MemberCreateRequest> invalidMemberCreateRequests() {
+        return Stream.of(
+                new MemberCreateRequest(null, "password1", "jay"),
+                new MemberCreateRequest("jaehee123", null, "jay"),
+                new MemberCreateRequest("jaehee123", "password1", null)
+        );
     }
 }

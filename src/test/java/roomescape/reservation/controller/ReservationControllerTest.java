@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import roomescape.common.exception.GlobalErrorCode;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
@@ -42,7 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.common.auth.UserArgumentResolver.GUEST_NAME_HEADER;
+import static roomescape.auth.UserArgumentResolver.GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.INVALID_GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.VALIDATION_ERROR;
 

@@ -10,6 +10,7 @@ public enum MemberErrorCode implements ErrorPolicy {
     INVALID_LOGIN_ID_LENGTH("로그인 아이디는 4자 이상 20자 이하여야 합니다.", BAD_REQUEST),
     INVALID_LOGIN_ID_FORMAT("로그인 아이디는 영문, 숫자, 언더스코어만 사용할 수 있습니다.", BAD_REQUEST),
     LOGIN_ID_ALREADY_EXISTS("이미 존재하는 로그인 ID입니다.", CONFLICT),
+    INVALID_LOGIN_CREDENTIALS("아이디 또는 비밀번호가 일치하지 않습니다.", UNAUTHORIZED),
 
     EMPTY_PASSWORD("비밀번호는 비어 있을 수 없습니다.", BAD_REQUEST),
     INVALID_PASSWORD_LENGTH("비밀번호는 8자 이상 20자 이하여야 합니다.", BAD_REQUEST),

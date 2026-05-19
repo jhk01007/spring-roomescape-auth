@@ -2,16 +2,28 @@ package roomescape.member.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 
 import java.sql.PreparedStatement;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class JdbcMemberRepository implements MemberRepository {
+
+    private final RowMapper<Member> memberRowMapper = (resultSet, rowNum) ->
+            Member.of(
+                    resultSet.getLong("id"),
+                    resultSet.getString("login_id"),
+                    resultSet.getString("password"),
+                    resultSet.getString("nickname"),
+                    Role.valueOf(resultSet.getString("role"))
+            );
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -36,6 +48,17 @@ public class JdbcMemberRepository implements MemberRepository {
 
         Long id = keyHolder.getKey().longValue();
         return member.withId(id);
+    }
+
+    @Override
+    public Optional<Member> findByLoginId(String loginId) {
+        return jdbcTemplate.query("""
+                        SELECT id, nickname, login_id, password, role
+                        FROM member
+                        WHERE login_id = ?
+                        """, memberRowMapper, loginId)
+                .stream()
+                .findFirst();
     }
 
     @Override

@@ -6,6 +6,8 @@ import roomescape.member.domain.vo.Nickname;
 import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 
+import java.util.Objects;
+
 @Getter
 public class Member {
 
@@ -31,6 +33,10 @@ public class Member {
         return new Member(null, loginId, password, nickname, Role.USER);
     }
 
+    public static Member of(Long id, String loginId, String password, String nickname, Role role) {
+        return new Member(id, loginId, password, nickname, role);
+    }
+
     public Member withId(Long id) {
         return new Member(id, loginId, password, nickname, role);
     }
@@ -45,5 +51,9 @@ public class Member {
 
     public String getNickname() {
         return nickname.nickname();
+    }
+
+    public boolean isPasswordSame(String password) {
+        return this.password.password().equals(password);
     }
 }

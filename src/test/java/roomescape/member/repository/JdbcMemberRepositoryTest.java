@@ -10,6 +10,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Role;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,6 +50,39 @@ class JdbcMemberRepositoryTest {
         assertThat(row.get("login_id")).isEqualTo("login1");
         assertThat(row.get("password")).isEqualTo("password1");
         assertThat(row.get("role")).isEqualTo(Role.USER.name());
+    }
+
+    @Test
+    @DisplayName("로그인 아이디로 회원을 조회한다.")
+    void findByLoginId() {
+        // given
+        insertMember("login1", "password1", "닉네임");
+
+        // when
+        Optional<Member> found = memberRepository.findByLoginId("login1");
+
+        // then
+        assertThat(found).isPresent();
+        Member member = found.get();
+        assertThat(member)
+                .extracting(
+                        Member::getLoginId,
+                        Member::getPassword,
+                        Member::getNickname,
+                        Member::getRole
+                )
+                .containsExactly("login1", "password1", "닉네임", Role.USER);
+        assertThat(member.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 로그인 아이디로 회원을 조회하면 빈 Optional을 반환한다.")
+    void findByLoginId_empty() {
+        // when
+        Optional<Member> found = memberRepository.findByLoginId("login1");
+
+        // then
+        assertThat(found).isEmpty();
     }
 
     @Test

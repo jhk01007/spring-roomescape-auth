@@ -16,6 +16,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     public Member signUp(String loginId, String password, String nickname) {
+
+        // TODO: 비밀번호 암호화
         Member member = Member.user(loginId, password, nickname);
         validateMemberCanCreate(loginId, nickname);
         return memberRepository.save(member);
