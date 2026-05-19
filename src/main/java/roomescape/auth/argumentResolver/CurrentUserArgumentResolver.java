@@ -10,6 +10,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 
 import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
 
@@ -19,10 +21,12 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 
     public static final String GUEST_NAME_HEADER = "X-Guest-Name";
 
+    private final MemberRepository memberRepository;
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(roomescape.auth.annotation.LoginMember.class)
-                && Long.class.isAssignableFrom(parameter.getParameterType());
+                && Member.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override
@@ -30,10 +34,15 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
             MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         Long memberId = (Long) request.getAttribute(LOGIN_MEMBER_ID);
+        return getMember(memberId);
+    }
+
+    private Member getMember(Long memberId) {
         if(memberId == null) {
             throw new DomainException(GlobalErrorCode.AUTHORIZATION_ERROR);
         }
 
-        return memberId;
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new DomainException(GlobalErrorCode.AUTHORIZATION_ERROR));
     }
 }

@@ -11,7 +11,7 @@ import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
 
 public class UserAuthInterceptor implements HandlerInterceptor {
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute(LOGIN_MEMBER_ID) == null) {
             throw new DomainException(GlobalErrorCode.AUTHORIZATION_ERROR);

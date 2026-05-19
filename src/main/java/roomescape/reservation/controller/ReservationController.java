@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.annotation.LoginMember;
+import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
@@ -24,9 +25,12 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(@RequestBody @Valid ReservationCreateRequest request) {
+    public ResponseEntity<ReservationResponse> create(
+            @RequestBody @Valid ReservationCreateRequest request,
+            @LoginMember Member member
+    ) {
         Reservation reservation = reservationService.create(
-                request.guestName(),
+                member.getNickname(),
                 request.date(),
                 request.timeId(),
                 request.themeId()
@@ -37,9 +41,9 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationListResponse> getListByGuestName(@LoginMember String guestName) {
+    public ResponseEntity<ReservationListResponse> getListByGuestName(@LoginMember Member member) {
 
-        List<Reservation> reservations = reservationService.findByGuestName(guestName);
+        List<Reservation> reservations = reservationService.findByGuestName(member.getNickname());
 
         return ResponseEntity.ok(
                 ReservationListResponse.from(reservations.stream()
@@ -51,19 +55,19 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> editDateTime(
             @PathVariable("id") Long id,
             @RequestBody @Valid ReservationEditRequest request,
-            @LoginMember String guestName
+            @LoginMember Member member
     ) {
         return ResponseEntity.ok(
                 ReservationResponse.from(
-                        reservationService.editDateTime(id, request.date(), request.timeId(), guestName)));
+                        reservationService.editDateTime(id, request.date(), request.timeId(), member.getNickname())));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable("id") Long id,
-            @LoginMember String guestName
+            @LoginMember Member member
     ) {
-        reservationService.deleteMine(id, guestName);
+        reservationService.deleteMine(id, member.getNickname());
         return ResponseEntity.noContent().build();
     }
 
