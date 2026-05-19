@@ -3,6 +3,7 @@ package roomescape.reservation.service.validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.common.exception.DomainException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 
@@ -23,15 +24,15 @@ public class ReservationValidator {
         validateNotPast(created);
     }
 
-    public void validateEdit(Reservation original, Reservation changed, String guestName) {
-        validateIsMyReservation(guestName, original);
+    public void validateEdit(Reservation original, Reservation changed, Member requester) {
+        validateIsMyReservation(requester, original);
         validateAlreadyStarted(original);
         validateNotPast(changed);
         validateNotDuplicatedExceptMine(changed);
     }
 
-    public void validateDelete(Reservation deleted, String guestName) {
-        validateIsMyReservation(guestName, deleted);
+    public void validateDelete(Reservation deleted, Member requester) {
+        validateIsMyReservation(requester, deleted);
         validateAlreadyStarted(deleted);
     }
 
@@ -68,8 +69,8 @@ public class ReservationValidator {
         }
     }
 
-    private void validateIsMyReservation(String guestName, Reservation reservation) {
-        if (!reservation.isSameGuest(guestName)) {
+    private void validateIsMyReservation(Member requester, Reservation reservation) {
+        if (!reservation.isSameGuest(requester)) {
             throw new DomainException(CANNOT_EDIT_OTHER_GUEST_RESERVATION);
         }
     }

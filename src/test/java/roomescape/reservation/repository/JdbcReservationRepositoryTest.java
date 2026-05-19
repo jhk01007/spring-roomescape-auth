@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.test_config.MutableClock;
@@ -59,10 +61,10 @@ class JdbcReservationRepositoryTest {
         Reservation found = optionalReservation.get();
         assertThat(found)
                 .extracting(
-                        Reservation::getId, Reservation::getGuestName, Reservation::getDate,
+                        Reservation::getId, Reservation::getGuest, Reservation::getDate,
                         Reservation::getTime, Reservation::getTheme
                 ).containsExactly(
-                        reservation.getId(), reservation.getGuestName(), reservation.getDate(),
+                        reservation.getId(), reservation.getGuest(), reservation.getDate(),
                         reservation.getTime(), reservation.getTheme()
                 );
     }
@@ -98,9 +100,9 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(reservations)
-                .extracting(Reservation::getId, Reservation::getGuestName, Reservation::getDate)
+                .extracting(Reservation::getId, Reservation::getGuest, Reservation::getDate)
                 .containsExactly(
-                        tuple(reservation2.getId(), "포비", LocalDate.of(2023, 8, 6))
+                        tuple(reservation2.getId(), reservation2.getGuest(), LocalDate.of(2023, 8, 6))
                 );
     }
 
@@ -124,7 +126,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약자 이름으로 예약 정보를 조회한다.")
+    @DisplayName("예약자로 예약 정보를 조회한다.")
     public void findByGuest() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
@@ -132,15 +134,15 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByGuestName(reservation.getGuestName());
+        List<Reservation> reservations = reservationRepository.findByGuestId(reservation.getGuest().getId());
 
         // then
         assertThat(reservations)
                 .extracting(
-                        Reservation::getId, Reservation::getGuestName, Reservation::getDate,
+                        Reservation::getId, Reservation::getGuest, Reservation::getDate,
                         Reservation::getTime, Reservation::getTheme
                 ).containsExactly(
-                        tuple(reservation.getId(), reservation.getGuestName(), reservation.getDate(),
+                        tuple(reservation.getId(), reservation.getGuest(), reservation.getDate(),
                                 reservation.getTime(), reservation.getTheme())
                 );
     }
@@ -154,7 +156,7 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertDeletedReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByGuestName(reservation.getGuestName());
+        List<Reservation> reservations = reservationRepository.findByGuestId(reservation.getGuest().getId());
 
         // then
         assertThat(reservations)
@@ -167,7 +169,8 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Member guest = insertMember("브라운");
+        Reservation reservation = new Reservation(guest, LocalDate.of(2023, 8, 5), time, theme);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -176,10 +179,10 @@ class JdbcReservationRepositoryTest {
         assertThat(saved.getId()).isNotNull();
         assertThat(saved)
                 .extracting(
-                        Reservation::getGuestName, Reservation::getDate,
+                        Reservation::getGuest, Reservation::getDate,
                         Reservation::getTime, Reservation::getTheme
                 ).containsExactly(
-                        reservation.getGuestName(), reservation.getDate(),
+                        reservation.getGuest(), reservation.getDate(),
                         reservation.getTime(), reservation.getTheme()
                 );
     }
@@ -428,42 +431,61 @@ class JdbcReservationRepositoryTest {
     }
 
     private Reservation insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+        Member guest = insertMember(guestName);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id)
                     VALUES (?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, guestName);
+            preparedStatement.setLong(1, guest.getId());
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
             return preparedStatement;
         }, keyHolder);
 
-        return new Reservation(getGeneratedId(keyHolder), guestName, date, time, theme);
+        return new Reservation(getGeneratedId(keyHolder), guest, date, time, theme);
     }
 
     private Reservation insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+        Member guest = insertMember(guestName);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         LocalDateTime now = LocalDateTime.now();
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, deleted_at)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id, deleted_at)
                     VALUES (?, ?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, guestName);
+            preparedStatement.setLong(1, guest.getId());
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
-
             preparedStatement.setTimestamp(5, Timestamp.valueOf(now));
             return preparedStatement;
         }, keyHolder);
 
-        return new Reservation(getGeneratedId(keyHolder), guestName, date, time, theme);
+        return new Reservation(getGeneratedId(keyHolder), guest, date, time, theme);
+    }
+
+    private Member insertMember(String nickname) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("""
+                    INSERT INTO member (nickname, login_id, password, role)
+                    VALUES (?, ?, ?, ?)
+                    """, new String[]{"id"});
+            preparedStatement.setString(1, nickname);
+            preparedStatement.setString(2, "login" + System.nanoTime());
+            preparedStatement.setString(3, "password1");
+            preparedStatement.setString(4, Role.USER.name());
+            return preparedStatement;
+        }, keyHolder);
+
+        return Member.of(getGeneratedId(keyHolder), "login1", "password1", nickname, Role.USER);
     }
 
     private Map<String, Object> findDateAndTimeIdById(Long id) {

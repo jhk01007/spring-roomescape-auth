@@ -30,10 +30,10 @@ public class ReservationController {
             @LoginMember Member member
     ) {
         Reservation reservation = reservationService.create(
-                member.getNickname(),
                 request.date(),
                 request.timeId(),
-                request.themeId()
+                request.themeId(),
+                member
         );
 
         return ResponseEntity.status(CREATED)
@@ -43,7 +43,7 @@ public class ReservationController {
     @GetMapping("/me")
     public ResponseEntity<ReservationListResponse> getListByGuestName(@LoginMember Member member) {
 
-        List<Reservation> reservations = reservationService.findByGuestName(member.getNickname());
+        List<Reservation> reservations = reservationService.findByGuest(member);
 
         return ResponseEntity.ok(
                 ReservationListResponse.from(reservations.stream()
@@ -59,7 +59,7 @@ public class ReservationController {
     ) {
         return ResponseEntity.ok(
                 ReservationResponse.from(
-                        reservationService.editDateTime(id, request.date(), request.timeId(), member.getNickname())));
+                        reservationService.editDateTime(id, request.date(), request.timeId(), member)));
     }
 
     @DeleteMapping("/{id}")
@@ -67,7 +67,7 @@ public class ReservationController {
             @PathVariable("id") Long id,
             @LoginMember Member member
     ) {
-        reservationService.deleteMine(id, member.getNickname());
+        reservationService.deleteMine(id, member);
         return ResponseEntity.noContent().build();
     }
 

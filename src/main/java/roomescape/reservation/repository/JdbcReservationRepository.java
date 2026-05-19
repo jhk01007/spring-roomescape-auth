@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -31,7 +33,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 SELECT
                     r.id AS reservation_id,
-                    r.guest_name,
+                    m.id AS member_id,
+                    m.login_id AS member_login_id,
+                    m.password AS member_password,
+                    m.nickname AS member_nickname,
+                    m.role AS member_role,
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
@@ -47,6 +53,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.time_id = t.id
                 INNER JOIN theme th
                     ON r.theme_id = th.id
+                INNER JOIN member m
+                    ON r.guest_id = m.id
                 WHERE r.id = ? AND r.deleted_at IS NULL
                 """;
 
@@ -59,7 +67,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
-                    r.guest_name,
+                    m.id AS member_id,
+                    m.login_id AS member_login_id,
+                    m.password AS member_password,
+                    m.nickname AS member_nickname,
+                    m.role AS member_role,
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
@@ -75,6 +87,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.time_id = t.id
                 INNER JOIN theme th
                     ON r.theme_id = th.id
+                INNER JOIN member m
+                    ON r.guest_id = m.id
                 WHERE r.deleted_at IS NULL
                 ORDER BY r.id
                 LIMIT ? OFFSET ?
@@ -82,11 +96,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByGuestName(String guestName) {
+    public List<Reservation> findByGuestId(Long guestId) {
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
-                    r.guest_name,
+                    m.id AS member_id,
+                    m.login_id AS member_login_id,
+                    m.password AS member_password,
+                    m.nickname AS member_nickname,
+                    m.role AS member_role,
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
@@ -102,8 +120,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.time_id = t.id
                 INNER JOIN theme th
                     ON r.theme_id = th.id
-                WHERE r.guest_name = ? AND r.deleted_at IS NULL
-                """, reservationRowMapper, guestName);
+                INNER JOIN member m
+                    ON r.guest_id = m.id
+                WHERE r.guest_id = ? AND r.deleted_at IS NULL
+                """, reservationRowMapper, guestId);
     }
 
     @Override
@@ -113,12 +133,12 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation (guest_name, date, time_id, theme_id)
+                            INSERT INTO reservation (guest_id, date, time_id, theme_id)
                             VALUES (?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
-            preparedStatement.setString(1, reservation.getGuestName());
+            preparedStatement.setLong(1, reservation.getGuest().getId());
             preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
@@ -212,9 +232,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                 toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
         );
 
+        Member guest = Member.of(
+                resultSet.getLong("member_id"),
+                resultSet.getString("member_login_id"),
+                resultSet.getString("member_password"),
+                resultSet.getString("member_nickname"),
+                Role.valueOf(resultSet.getString("member_role"))
+        );
+
         return new Reservation(
                 resultSet.getLong("reservation_id"),
-                resultSet.getString("guest_name"),
+                guest,
                 resultSet.getDate("date").toLocalDate(),
                 reservationTime,
                 theme,

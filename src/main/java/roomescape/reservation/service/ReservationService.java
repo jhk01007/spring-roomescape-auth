@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -29,11 +30,11 @@ public class ReservationService {
     private final ReservationValidator reservationValidator;
 
     @Transactional
-    public Reservation create(String guestName, LocalDate date, Long timeId, Long themeId) {
+    public Reservation create(LocalDate date, Long timeId, Long themeId, Member guest) {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
 
-        Reservation reservation = new Reservation(guestName, date, time, theme);
+        Reservation reservation = new Reservation(guest, date, time, theme);
 
         reservationValidator.validateCreate(reservation);
 
@@ -46,17 +47,17 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findByGuestName(String guestName) {
-        return reservationRepository.findByGuestName(guestName);
+    public List<Reservation> findByGuest(Member guest) {
+        return reservationRepository.findByGuestId(guest.getId());
     }
 
     @Transactional
-    public Reservation editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
+    public Reservation editDateTime(Long reservationId, LocalDate date, Long timeId, Member requester) {
         Reservation reservation = getReservation(reservationId);
         ReservationTime changedTime = getReservationTime(timeId);
         Reservation changedReservation = reservation.changeDateAndTime(date, changedTime);
 
-        reservationValidator.validateEdit(reservation, changedReservation, guestName);
+        reservationValidator.validateEdit(reservation, changedReservation, requester);
 
         updateReservation(changedReservation);
 
@@ -69,9 +70,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteMine(Long id, String guestName) {
+    public void deleteMine(Long id, Member requester) {
         Reservation reservation = getReservation(id);
-        reservationValidator.validateDelete(reservation, guestName);
+        reservationValidator.validateDelete(reservation, requester);
         cancelReservation(id);
     }
 

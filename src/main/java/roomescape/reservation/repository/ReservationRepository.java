@@ -12,7 +12,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAll(int page, int size);
 
-    List<Reservation> findByGuestName(String guestName);
+    List<Reservation> findByGuestId(Long guestId);
 
     Reservation save(Reservation reservation);
 

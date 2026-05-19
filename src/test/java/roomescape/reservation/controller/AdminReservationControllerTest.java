@@ -11,6 +11,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
@@ -52,9 +54,9 @@ class AdminReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme),
-                new Reservation(2L, "포비", LocalDate.of(2023, 8, 6), time, theme),
-                new Reservation(3L, "조이", LocalDate.of(2023, 8, 7), time, theme)
+                new Reservation(1L, member(1L, "브라운"), LocalDate.of(2023, 8, 5), time, theme),
+                new Reservation(2L, member(2L, "포비"), LocalDate.of(2023, 8, 6), time, theme),
+                new Reservation(3L, member(3L, "조이"), LocalDate.of(2023, 8, 7), time, theme)
         );
         given(reservationService.findAllReservations(1, 20)).willReturn(reservations);
 
@@ -83,7 +85,7 @@ class AdminReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
-                new Reservation(3L, "조이", LocalDate.of(2023, 8, 7), time, theme)
+                new Reservation(3L, member(3L, "조이"), LocalDate.of(2023, 8, 7), time, theme)
         );
         given(reservationService.findAllReservations(2, 2)).willReturn(reservations);
 
@@ -147,6 +149,10 @@ class AdminReservationControllerTest {
                         tuple(2L, "포비", "2023-08-06"),
                         tuple(3L, "조이", "2023-08-07")
                 );
+    }
+
+    private static Member member(Long id, String nickname) {
+        return Member.of(id, "login" + id, "password1", nickname, Role.USER);
     }
 
     @Test

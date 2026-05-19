@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
@@ -31,7 +33,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -63,9 +64,10 @@ class ReservationControllerTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Member member = member(1L, "브라운");
+        Reservation reservation = new Reservation(1L, member, LocalDate.of(2023, 8, 5), time, theme);
 
-        given(reservationService.create(anyString(), any(), anyLong(), anyLong()))
+        given(reservationService.create(any(), any(), anyLong(), any()))
                 .willReturn(reservation);
 
         ReservationCreateRequest request = new ReservationCreateRequest(
@@ -95,7 +97,7 @@ class ReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .create(request.guestName(), request.date(), request.timeId(), request.themeId());
+                .create(request.date(), request.timeId(), request.themeId(), member);
     }
 
     private static void assertReservation(ReservationResponse reservationResponse, Reservation reservation) {
@@ -103,7 +105,7 @@ class ReservationControllerTest {
                 ReservationResponse::id,
                 ReservationResponse::guestName,
                 ReservationResponse::date
-        ).containsExactly(reservation.getId(), reservation.getGuestName(), reservation.getDate().toString());
+        ).containsExactly(reservation.getId(), reservation.getGuest().getNickname(), reservation.getDate().toString());
     }
 
     private static void assertTime(ReservationResponse reservationResponse, ReservationTime time) {
@@ -183,13 +185,14 @@ class ReservationControllerTest {
     @DisplayName("예약자 이름으로 된 예약을 조회하는 요청을 하면 특정 사용자의 예약 정보가 응답으로 반환된다.")
     public void getListByGuestName_success() throws Exception {
         // given
-        String guestName = "브라운";
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = new Reservation(1L, guestName, LocalDate.of(2023, 8, 5), time, theme);
+        String guestName = "브라운";
+        Member member = member(1L, guestName);
+        Reservation reservation = new Reservation(1L, member, LocalDate.of(2023, 8, 5), time, theme);
 
-        given(reservationService.findByGuestName(guestName))
+        given(reservationService.findByGuest(any()))
                 .willReturn(List.of(reservation));
 
         // when then
@@ -216,7 +219,7 @@ class ReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .findByGuestName(guestName);
+                .findByGuest(member);
     }
 
     @Test
@@ -226,9 +229,12 @@ class ReservationControllerTest {
         Long reservationId = 1L;
         ReservationTime time = new ReservationTime(2L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = new Reservation(reservationId, "브라운", LocalDate.of(2023, 8, 10), time, theme);
 
-        given(reservationService.editDateTime(anyLong(), any(), anyLong(), anyString()))
+        LocalDate date = LocalDate.of(2023, 8, 10);
+        Member member = member(1L, "브라운");
+        Reservation reservation = new Reservation(reservationId, member, date, time, theme);
+
+        given(reservationService.editDateTime(anyLong(), any(), anyLong(), any()))
                 .willReturn(reservation);
 
         ReservationEditRequest request = new ReservationEditRequest(
@@ -259,7 +265,7 @@ class ReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .editDateTime(reservationId, request.date(), request.timeId(), "브라운");
+                .editDateTime(reservationId, request.date(), request.timeId(), member);
     }
 
     @ParameterizedTest
@@ -340,7 +346,10 @@ class ReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .deleteMine(reservationId, "브라운");
+                .deleteMine(reservationId, any());
     }
 
+    private static Member member(Long id, String nickname) {
+        return Member.of(id, "login" + id, "password1", nickname, Role.USER);
+    }
 }

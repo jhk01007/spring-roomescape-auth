@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.member.domain.vo.Role;
 import roomescape.test_config.MutableClock;
 import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
@@ -382,12 +383,14 @@ class JdbcThemeRepositoryTest {
     }
 
     private void insertReservation(String guestName, LocalDate date, Long timeId, Theme theme) {
+        Long guestId = insertMember(guestName);
+
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id)
                     VALUES (?, ?, ?, ?)
                     """);
-            preparedStatement.setString(1, guestName);
+            preparedStatement.setLong(1, guestId);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, timeId);
             preparedStatement.setLong(4, theme.getId());
@@ -396,18 +399,38 @@ class JdbcThemeRepositoryTest {
     }
 
     private void insertDeletedReservation(String guestName, LocalDate date, Long timeId, Theme theme) {
+        Long guestId = insertMember(guestName);
+
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, deleted_at)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id, deleted_at)
                     VALUES (?, ?, ?, ?, ?)
                     """);
-            preparedStatement.setString(1, guestName);
+            preparedStatement.setLong(1, guestId);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, timeId);
             preparedStatement.setLong(4, theme.getId());
             preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             return preparedStatement;
         });
+    }
+
+    private Long insertMember(String nickname) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("""
+                    INSERT INTO member (nickname, login_id, password, role)
+                    VALUES (?, ?, ?, ?)
+                    """, new String[]{"id"});
+            preparedStatement.setString(1, nickname);
+            preparedStatement.setString(2, "login" + System.nanoTime());
+            preparedStatement.setString(3, "password1");
+            preparedStatement.setString(4, Role.USER.name());
+            return preparedStatement;
+        }, keyHolder);
+
+        return getGeneratedId(keyHolder);
     }
 
     private Map<String, Object> findDeleteInfoById(Long id) {

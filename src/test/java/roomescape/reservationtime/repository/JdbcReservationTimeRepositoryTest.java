@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import roomescape.member.domain.vo.Role;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 import roomescape.test_config.MutableClock;
@@ -264,12 +265,14 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     private void insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+        Long guestId = insertMember(guestName);
+
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id)
                     VALUES (?, ?, ?, ?)
                     """);
-            preparedStatement.setString(1, guestName);
+            preparedStatement.setLong(1, guestId);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
@@ -278,18 +281,48 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     private void insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+        Long guestId = insertMember(guestName);
+
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, deleted_at)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id, deleted_at)
                     VALUES (?, ?, ?, ?, ?)
                     """);
-            preparedStatement.setString(1, guestName);
+            preparedStatement.setLong(1, guestId);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
             preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             return preparedStatement;
         });
+    }
+
+    private Long insertMember(String nickname) {
+        List<Long> existingMemberIds = jdbcTemplate.queryForList("""
+                SELECT id
+                FROM member
+                WHERE nickname = ?
+                """, Long.class, nickname);
+
+        if (!existingMemberIds.isEmpty()) {
+            return existingMemberIds.get(0);
+        }
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("""
+                    INSERT INTO member (nickname, login_id, password, role)
+                    VALUES (?, ?, ?, ?)
+                    """, new String[]{"id"});
+            preparedStatement.setString(1, nickname);
+            preparedStatement.setString(2, "login" + System.nanoTime());
+            preparedStatement.setString(3, "password1");
+            preparedStatement.setString(4, Role.USER.name());
+            return preparedStatement;
+        }, keyHolder);
+
+        return getGeneratedId(keyHolder);
     }
 
     private Map<String, Object> findDeleteInfoById(Long id) {

@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.test_config.TestClockConfig;
@@ -123,21 +125,40 @@ class ReservationTimeServiceTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        Member guest = insertMember(name);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
+                    INSERT INTO reservation (guest_id, date, time_id, theme_id)
                     VALUES (?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, name);
+            preparedStatement.setLong(1, guest.getId());
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
             return preparedStatement;
         }, keyHolder);
 
-        return new Reservation(getGeneratedId(keyHolder), name, date, time, theme);
+        return new Reservation(getGeneratedId(keyHolder), guest, date, time, theme);
+    }
+
+    private Member insertMember(String nickname) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("""
+                    INSERT INTO member (nickname, login_id, password, role)
+                    VALUES (?, ?, ?, ?)
+                    """, new String[]{"id"});
+            preparedStatement.setString(1, nickname);
+            preparedStatement.setString(2, "login" + System.nanoTime());
+            preparedStatement.setString(3, "password1");
+            preparedStatement.setString(4, Role.USER.name());
+            return preparedStatement;
+        }, keyHolder);
+
+        return Member.of(getGeneratedId(keyHolder), "login1", "password1", nickname, Role.USER);
     }
 
     private Long getGeneratedId(KeyHolder keyHolder) {

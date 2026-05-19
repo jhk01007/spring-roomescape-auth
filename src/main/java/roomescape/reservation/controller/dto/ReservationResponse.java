@@ -9,7 +9,7 @@ public record ReservationResponse(Long id, String guestName, String date, Reserv
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getGuestName(),
+                reservation.getGuest().getNickname(),
                 reservation.getDate().toString(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
