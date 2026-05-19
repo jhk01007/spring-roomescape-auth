@@ -18,6 +18,19 @@ CREATE TABLE reservation_time
     UNIQUE (start_at, delete_token)
 );
 
+CREATE TABLE member
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    nickname VARCHAR(10)  NOT NULL,
+    login_id VARCHAR(20)  NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role     VARCHAR(20)  NOT NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE (login_id),
+    UNIQUE (nickname)
+);
+
 CREATE TABLE reservation
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
