@@ -1,18 +1,30 @@
 package roomescape.member.domain.vo;
 
+import roomescape.auth.domain.PasswordEncoder;
 import roomescape.common.exception.DomainException;
 
 import static roomescape.member.exception.MemberErrorCode.*;
 
-public record Password(String password) {
+public class Password  {
     public static final int MIN_LENGTH = 8;
     public static final int MAX_LENGTH = 20;
 
-    public Password {
-        validate(password);
+    private final String password;
+
+    private Password(String password) {
+        this.password = password;
     }
 
-    private void validate(String password) {
+    public static Password encode(String rawPassword, PasswordEncoder passwordEncoder) {
+        validateRawPassword(rawPassword);
+        return new Password(passwordEncoder.encode(rawPassword));
+    }
+    public static Password fromEncoded(String encodedPassword) {
+        return new Password(encodedPassword);
+    }
+
+
+    private static void validateRawPassword(String password) {
         if (password == null || password.isBlank()) {
             throw new DomainException(EMPTY_PASSWORD);
         }
@@ -32,5 +44,9 @@ public record Password(String password) {
         if (password.chars().anyMatch(Character::isWhitespace)) {
             throw new DomainException(PASSWORD_MUST_NOT_CONTAIN_WHITESPACE);
         }
+    }
+
+    public String password() {
+        return password;
     }
 }

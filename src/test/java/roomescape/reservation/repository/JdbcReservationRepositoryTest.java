@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -485,7 +486,7 @@ class JdbcReservationRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return Member.of(getGeneratedId(keyHolder), "login1", "password1", nickname, Role.USER);
+        return Member.of(getGeneratedId(keyHolder), "login1", Password.fromEncoded("password1"), nickname, Role.USER);
     }
 
     private Map<String, Object> findDateAndTimeIdById(Long id) {

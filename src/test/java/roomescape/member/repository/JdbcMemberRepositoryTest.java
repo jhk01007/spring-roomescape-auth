@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ class JdbcMemberRepositoryTest {
     @DisplayName("회원을 저장한다.")
     void save() {
         // given
-        Member member = Member.user("login1", "password1", "닉네임");
+        Member member = Member.user("login1", Password.fromEncoded("password1"), "닉네임");
 
         // when
         Member saved = memberRepository.save(member);
@@ -56,7 +57,7 @@ class JdbcMemberRepositoryTest {
     @DisplayName("id로 회원을 조회한다.")
     void findById() {
         // given
-        Member saved = memberRepository.save(Member.user("login1", "password1", "닉네임"));
+        Member saved = memberRepository.save(Member.user("login1", Password.fromEncoded("password1"), "닉네임"));
 
         // when
         Optional<Member> found = memberRepository.findById(saved.getId());

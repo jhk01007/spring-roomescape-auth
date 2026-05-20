@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -235,7 +236,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         Member guest = Member.of(
                 resultSet.getLong("member_id"),
                 resultSet.getString("member_login_id"),
-                resultSet.getString("member_password"),
+                Password.fromEncoded(resultSet.getString("member_password")),
                 resultSet.getString("member_nickname"),
                 Role.valueOf(resultSet.getString("member_role"))
         );

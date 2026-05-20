@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.test_config.ControllerTest;
 
@@ -48,7 +49,7 @@ class AuthControllerTest {
         String loginId = "jaehee123";
         String password = "password1";
         LoginRequest request = new LoginRequest(loginId, password);
-        Member mockMember = Member.of(1L, loginId, password, "jaehee", Role.USER);
+        Member mockMember = Member.of(1L, loginId, Password.fromEncoded(password), "jaehee", Role.USER);
 
         given(authService.login(loginId, password))
                 .willReturn(mockMember);

@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import roomescape.common.exception.DomainException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.JdbcReservationRepository;
@@ -409,7 +410,7 @@ class ReservationServiceTest {
             return preparedStatement;
         }, keyHolder);
 
-        return Member.of(getGeneratedId(keyHolder), "login1", "password1", nickname, Role.USER);
+        return Member.of(getGeneratedId(keyHolder), "login1", Password.fromEncoded("password1"), nickname, Role.USER);
     }
 
     private Long getGeneratedId(KeyHolder keyHolder) {
@@ -417,6 +418,6 @@ class ReservationServiceTest {
     }
 
     private static Member createMockMember(long id, String nickname) {
-        return Member.of(id, "loginid1", "password1", nickname, Role.USER);
+        return Member.of(id, "loginid1", Password.fromEncoded("password1"), nickname, Role.USER);
     }
 }

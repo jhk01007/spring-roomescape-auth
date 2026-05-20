@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -153,7 +154,7 @@ class AdminReservationControllerTest {
     }
 
     private static Member member(Long id, String nickname) {
-        return Member.of(id, "login" + id, "password1", nickname, Role.USER);
+        return Member.of(id, "login" + id, Password.fromEncoded("password1"), nickname, Role.USER);
     }
 
     @Test

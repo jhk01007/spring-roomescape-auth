@@ -25,16 +25,12 @@ public class Member {
         this.role = role;
     }
 
-    private Member(Long id, String loginId, String password, String nickname, Role role) {
-        this(id, new LoginId(loginId), new Password(password), new Nickname(nickname), role);
+    public static Member user(String loginId, Password password, String nickname) {
+        return new Member(null, new LoginId(loginId), password, new Nickname(nickname), Role.USER);
     }
 
-    public static Member user(String loginId, String password, String nickname) {
-        return new Member(null, loginId, password, nickname, Role.USER);
-    }
-
-    public static Member of(Long id, String loginId, String password, String nickname, Role role) {
-        return new Member(id, loginId, password, nickname, role);
+    public static Member of(Long id, String loginId, Password password, String nickname, Role role) {
+        return new Member(id, new LoginId(loginId), password, new Nickname(nickname), role);
     }
 
     public Member withId(Long id) {
@@ -51,10 +47,6 @@ public class Member {
 
     public String getNickname() {
         return nickname.nickname();
-    }
-
-    public boolean isPasswordSame(String password) {
-        return this.password.password().equals(password);
     }
 
     @Override

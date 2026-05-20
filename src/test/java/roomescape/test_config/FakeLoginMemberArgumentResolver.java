@@ -8,12 +8,13 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.annotation.LoginMember;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 
 @Component
 public class FakeLoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private Member member = Member.of(1L, "test123", "password1", "tester", Role.USER);
+    private Member member = Member.of(1L, "test123", Password.fromEncoded("password1"), "tester", Role.USER);
 
     public void setMember(Member member) {
         this.member = member;

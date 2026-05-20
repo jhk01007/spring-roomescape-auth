@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.auth.infra.BCryptPasswordEncoder;
 import roomescape.common.exception.DomainException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.exception.MemberErrorCode;
 import roomescape.member.repository.JdbcMemberRepository;
 import roomescape.member.repository.MemberRepository;
@@ -16,7 +18,8 @@ import static org.assertj.core.api.Assertions.*;
 @JdbcTest
 @Import({
         AuthService.class,
-        JdbcMemberRepository.class
+        JdbcMemberRepository.class,
+        BCryptPasswordEncoder.class
 })
 class AuthServiceTest {
 
@@ -26,6 +29,9 @@ class AuthServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
     @Test
     @DisplayName("로그인에 성공하면 성공한 Member 객체를 반환한다.")
     public void login_success() {
@@ -33,7 +39,7 @@ class AuthServiceTest {
         String loginId = "login1";
         String password = "password1";
         String nickname = "닉네임";
-        memberRepository.save(Member.user(loginId, password, nickname));
+        memberRepository.save(Member.user(loginId, Password.encode(password, encoder), nickname));
 
         // when
         Member loginMember = authService.login(loginId, password);
@@ -42,9 +48,10 @@ class AuthServiceTest {
         assertThat(loginMember)
                 .extracting(
                         Member::getLoginId,
-                        Member::getPassword,
                         Member::getNickname
-                ).containsExactly(loginId, password, nickname);
+                ).containsExactly(loginId, nickname);
+
+        assertThat(encoder.matches(password,loginMember.getPassword())).isTrue();
     }
 
     @Test
@@ -67,7 +74,7 @@ class AuthServiceTest {
         String loginId = "login1";
         String password = "password1";
         String nickname = "닉네임";
-        memberRepository.save(Member.user(loginId, password, nickname));
+        memberRepository.save(Member.user(loginId, Password.encode(password, encoder), nickname));
 
         // when then
         assertThatThrownBy(() -> authService.login(loginId, "password2"))

@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
@@ -25,8 +25,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.service.ReservationService;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -328,6 +326,6 @@ class ReservationControllerTest {
     }
 
     private static Member member(Long id, String nickname) {
-        return Member.of(id, "login" + id, "password1", nickname, Role.USER);
+        return Member.of(id, "login" + id, Password.fromEncoded("password1"), nickname, Role.USER);
     }
 }

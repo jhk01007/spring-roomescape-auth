@@ -1,13 +1,14 @@
 package roomescape.member.service;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.auth.infra.BCryptPasswordEncoder;
 import roomescape.common.exception.DomainException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.member.exception.MemberErrorCode;
 import roomescape.member.repository.JdbcMemberRepository;
@@ -19,16 +20,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @JdbcTest
 @Import({
         MemberService.class,
-        JdbcMemberRepository.class
-}
-)
+        JdbcMemberRepository.class,
+        BCryptPasswordEncoder.class
+})
 class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;
     @Autowired
     private MemberRepository memberRepository;
-
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     @Test
     @DisplayName("회원가입을 하면 Role이 USER인 사용자가 생성된다.")
@@ -45,10 +47,10 @@ class MemberServiceTest {
         assertThat(member.getId()).isNotNull();
         assertThat(member).extracting(
                 Member::getLoginId,
-                Member::getPassword,
                 Member::getNickname,
                 Member::getRole
-        ).containsExactly(loginId, password, nickname, Role.USER);
+        ).containsExactly(loginId, nickname, Role.USER);
+        assertThat(encoder.matches(password, member.getPassword())).isTrue();
     }
 
     @Test
@@ -58,7 +60,7 @@ class MemberServiceTest {
         String loginId = "login1";
         String password = "password1";
         String nickname = "닉네임";
-        memberRepository.save(Member.user(loginId, password, nickname));
+        memberRepository.save(Member.user(loginId, Password.fromEncoded(password), nickname));
 
         // when then
         assertThatThrownBy(() -> memberService.signUp(loginId, password + "_", nickname + "_"))
@@ -73,7 +75,7 @@ class MemberServiceTest {
         String loginId = "login1";
         String password = "password1";
         String nickname = "닉네임";
-        memberRepository.save(Member.user(loginId, password, nickname));
+        memberRepository.save(Member.user(loginId, Password.fromEncoded(password), nickname));
 
         // when then
         assertThatThrownBy(() -> memberService.signUp(loginId + "_", password, nickname))

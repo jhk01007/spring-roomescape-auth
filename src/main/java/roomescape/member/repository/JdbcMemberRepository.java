@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 
 import java.sql.PreparedStatement;
@@ -20,7 +21,7 @@ public class JdbcMemberRepository implements MemberRepository {
             Member.of(
                     resultSet.getLong("id"),
                     resultSet.getString("login_id"),
-                    resultSet.getString("password"),
+                    Password.fromEncoded(resultSet.getString("password")),
                     resultSet.getString("nickname"),
                     Role.valueOf(resultSet.getString("role"))
             );

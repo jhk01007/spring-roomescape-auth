@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import roomescape.common.exception.DomainException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -101,7 +102,7 @@ class ThemeServiceTest {
             return preparedStatement;
         }, keyHolder);
 
-        return Member.of(getGeneratedId(keyHolder), "login1", "password1", nickname, Role.USER);
+        return Member.of(getGeneratedId(keyHolder), "login1", Password.fromEncoded("password1"), nickname, Role.USER);
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {

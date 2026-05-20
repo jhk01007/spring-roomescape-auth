@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.ErrorPolicy;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -127,7 +128,7 @@ class ReservationTest {
     private static Stream<Arguments> guests() {
         return Stream.of(
                 Arguments.of(member("브라운"), true),
-                Arguments.of(Member.of(2L, "login2", "password1", "포비", Role.USER), false)
+                Arguments.of(Member.of(2L, "login2", Password.fromEncoded("password1"), "포비", Role.USER), false)
         );
     }
 
@@ -140,6 +141,6 @@ class ReservationTest {
     }
 
     private static Member member(String nickname) {
-        return Member.of(1L, "login1", "password1", nickname, Role.USER);
+        return Member.of(1L, "login1", Password.fromEncoded("password1"), nickname, Role.USER);
     }
 }
