@@ -58,7 +58,7 @@ Content-Type: application/json
 | 아이디가 중복될 때                     | `409` | ✅|
 | 닉네임이 중복될 때                     | `409` | ✅ |
 
-### [✅] 로그인 API
+### [✅] 웹 로그인 API
 **Request**
 
 ```http
@@ -71,8 +71,8 @@ Content-Type: application/json
 }
 ```
 
-**Response**
-
+**Response** <br>
+> 세션에 id 값이 세팅되고 쿠키에 JSessionId가 추가된다.
 ```http
 HTTP/1.1 204
 ```
@@ -84,11 +84,75 @@ HTTP/1.1 204
 | 유효하지 않는 입력값(아이디, 비밀번호 형식) | `400` |✅|
 | 로그인 실패(아이디 없음 / 비번 안맞음)   | `401` | ✅|
 
-### [✅] 로그아웃 API
+### [✅] 웹 로그아웃 API
+**Request**
+> 해당 세션을 무효화한다.
+```http
+POST /auth/logout HTTP/1.1
+Content-Type: application/json
+```
+
+**Response**
+
+```http
+HTTP/1.1 204
+```
+
+---
+
+# 2️⃣ 2단계
+
+## 🙆 ‍요구사항
+### 모바일 로그인
+- [ ] 모바일 앱 사용자는 로그인할 수 있다. 
+- [ ] 로그인 성공 후 모바일 앱이 이후 요청에서 사용할 인증 정보를 받을 수 있어야 한다. 
+- [ ] 인증 정보는 이후 요청마다 서버가 사용자를 식별할 수 있는 형태여야 한다.
+
+### 모바일 인증 요청
+- [ ] 모바일 앱은 인증이 필요한 API를 호출할 때 인증 정보를 함께 전달한다. 
+- [ ] 서버는 전달된 인증 정보를 검증한다. 
+- [ ] 인증 정보가 유효하면 로그인한 사용자로 요청을 처리한다. 
+- [ ] 인증 정보가 없거나 유효하지 않으면 요청을 거부한다.
+
+### 웹 인증과의 관계
+- [ ] 웹 인증 흐름과 모바일 인증 흐름이 어떤 점에서 같은지 설명할 수 있어야 한다. 
+- [ ] 웹 인증 흐름과 모바일 인증 흐름이 어떤 점에서 다른지 설명할 수 있어야 한다. 
+- [ ] 가능한 한 중복된 인증 로직을 줄인다.
+
+## 추가해야할 API
+### [✅] 모바일 로그인 API
 **Request**
 
 ```http
-POST /auth/logout HTTP/1.1
+POST /auth/mobile/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "loginId": "jaehee123",
+  "password": "pass1234"
+}
+```
+
+**Response** <br>
+> 토큰이 응답바디로 전달된다.
+```http
+HTTP/1.1 204
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+}
+```
+
+에러 상황:
+
+| 에러 상황                     | 상태코드  | 구현여부 |
+|---------------------------|-------|-|
+| 유효하지 않는 입력값(아이디, 비밀번호 형식) | `400` |✅|
+| 로그인 실패(아이디 없음 / 비번 안맞음)   | `401` | ✅|
+
+### [ ] 모바일 로그아웃 API
+**Request**
+```http
+POST /auth/mobile/logout HTTP/1.1
 Content-Type: application/json
 ```
 
