@@ -5,8 +5,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
-import roomescape.auth.argumentResolver.LoginMemberArgumentResolver;
-import roomescape.auth.config.WebConfig;
+import roomescape.auth.resolver.LoginMemberArgumentResolver;
+import roomescape.common.config.WebConfig;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

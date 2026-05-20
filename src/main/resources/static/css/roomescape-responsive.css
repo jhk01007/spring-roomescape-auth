@@ -1,0 +1,146 @@
+    @media (max-width: 980px) {
+      .popular-band,
+      .reservation-layout,
+      .auth-grid,
+      .auth-form,
+      .auth-form:nth-child(2),
+      .control-strip,
+      .lookup-head,
+      .admin-layout,
+      .admin-header {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-panel {
+        position: static;
+      }
+
+      .theme-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .time-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .admin-header {
+        display: grid;
+        align-items: start;
+      }
+
+    }
+
+    @media (max-width: 620px) {
+      .topbar-inner,
+      main {
+        width: min(100vw - 20px, 1180px);
+      }
+
+      .topbar-inner {
+        height: auto;
+        min-height: 64px;
+        padding: 10px 0;
+        align-items: start;
+        flex-wrap: wrap;
+      }
+
+      .topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .view-button {
+        min-width: 64px;
+      }
+
+      .brand-subtitle,
+      .status-pill {
+        font-size: 12px;
+      }
+
+      .brand-title {
+        font-size: 17px;
+      }
+
+      .popular-title {
+        font-size: 23px;
+      }
+
+      .theme-grid,
+      .time-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .theme-grid {
+        max-height: 560px;
+      }
+
+      .theme-button {
+        grid-template-columns: 120px 1fr;
+        grid-template-rows: 1fr;
+        min-height: 132px;
+      }
+
+      .theme-thumb {
+        height: 100%;
+        min-height: 132px;
+      }
+
+      .area-header {
+        display: grid;
+        align-items: start;
+      }
+
+      .area-subtitle {
+        white-space: normal;
+      }
+
+      .summary-row {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .admin-title {
+        font-size: 24px;
+      }
+
+      .admin-pagination {
+        display: grid;
+        align-items: start;
+      }
+
+      .page-controls {
+        justify-content: space-between;
+      }
+
+      .theme-list-row,
+      .list-row {
+        grid-template-columns: 1fr;
+      }
+
+      .edit-head {
+        display: grid;
+      }
+
+      .admin-reserve-grid,
+      .admin-time-grid,
+      .auth-head,
+      .lookup-actions,
+      .lookup-form,
+      .edit-grid,
+      .edit-head {
+        grid-template-columns: 1fr;
+      }
+
+      .row-actions {
+        width: 100%;
+      }
+
+      .row-actions > button {
+        flex: 1;
+      }
+
+      .admin-thumb {
+        width: 100%;
+        height: 86px;
+      }
+    }

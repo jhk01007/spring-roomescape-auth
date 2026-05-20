@@ -1,4 +1,4 @@
-package roomescape.auth.argumentResolver;
+package roomescape.auth.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,8 @@ import roomescape.common.exception.GlobalErrorCode;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 
-import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
+import static roomescape.auth.interceptor.AuthInterceptor.LOGIN_MEMBER_ID;
+
 
 @RequiredArgsConstructor
 @Component

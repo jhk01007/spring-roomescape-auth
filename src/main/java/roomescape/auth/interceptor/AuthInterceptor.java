@@ -7,9 +7,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 
-import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
 
 public class AuthInterceptor implements HandlerInterceptor {
+    public static final String LOGIN_MEMBER_ID = "loginMemberId";
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession(false);

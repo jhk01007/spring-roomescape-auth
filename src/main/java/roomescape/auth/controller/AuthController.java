@@ -12,7 +12,8 @@ import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
 
-import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
+import static roomescape.auth.interceptor.AuthInterceptor.LOGIN_MEMBER_ID;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +26,12 @@ public class AuthController {
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest, HttpSession httpSession) {
         Member member = authService.login(loginRequest.loginId(), loginRequest.password());
         httpSession.setAttribute(LOGIN_MEMBER_ID, member.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpSession httpSession) {
+        httpSession.invalidate();
         return ResponseEntity.noContent().build();
     }
 }

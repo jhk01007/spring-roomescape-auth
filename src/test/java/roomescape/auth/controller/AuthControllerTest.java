@@ -1,26 +1,33 @@
 package roomescape.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.vo.Role;
 import roomescape.test_config.ControllerTest;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
 
 @ControllerTest(AuthController.class)
 class AuthControllerTest {
@@ -35,23 +42,32 @@ class AuthControllerTest {
     private AuthService authService;
 
     @Test
-    @DisplayName("로그인 요청을 한다.")
+    @DisplayName("로그인 요청을 하면 세션에 해당 사용자의 id정보가 세팅된다.")
     public void login_success() throws Exception {
         // given
         String loginId = "jaehee123";
         String password = "password1";
         LoginRequest request = new LoginRequest(loginId, password);
+        Member mockMember = Member.of(1L, loginId, password, "jaehee", Role.USER);
+
         given(authService.login(loginId, password))
-                .willReturn(Member.user(loginId, password, "jaehee"));
+                .willReturn(mockMember);
 
         // when then
-        mockMvc.perform(
+        MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.post("/auth/login")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        // then
+        HttpSession session = result.getRequest().getSession(false);
+
+        assertThat(session).isNotNull();
+        assertThat(session.getAttribute(LOGIN_MEMBER_ID)).isEqualTo(mockMember.getId());
 
         then(authService).should()
                 .login(loginId, password);
@@ -76,5 +92,24 @@ class AuthControllerTest {
                 new LoginRequest(null, "password1"),
                 new LoginRequest("jaehee123", null)
         );
+    }
+
+    @Test
+    @DisplayName("로그아웃을 한다.")
+    public void logout_success() throws Exception {
+        // given
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_MEMBER_ID, 1L);
+
+        // when
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/auth/logout")
+                                .session(session)
+                )
+                .andDo(print())
+                .andExpect(status().isNoContent());
+
+        // then
+        assertThat(session.isInvalid()).isTrue();
     }
 }
