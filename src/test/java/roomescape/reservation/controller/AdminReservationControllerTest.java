@@ -17,6 +17,7 @@ import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.test_config.ControllerTest;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.service.ReservationService;
 
@@ -35,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = AdminReservationController.class)
+@ControllerTest(AdminReservationController.class)
 class AdminReservationControllerTest {
 
     @Autowired

@@ -6,21 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
+import roomescape.member.domain.Member;
+import roomescape.test_config.ControllerTest;
 
 import java.util.stream.Stream;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
+@ControllerTest(AuthController.class)
 class AuthControllerTest {
 
     @Autowired
@@ -39,6 +41,8 @@ class AuthControllerTest {
         String loginId = "jaehee123";
         String password = "password1";
         LoginRequest request = new LoginRequest(loginId, password);
+        given(authService.login(loginId, password))
+                .willReturn(Member.user(loginId, password, "jaehee"));
 
         // when then
         mockMvc.perform(

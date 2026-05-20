@@ -17,6 +17,7 @@ import roomescape.member.controller.dto.MemberCreateRequest;
 import roomescape.member.controller.dto.MemberCreateResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
+import roomescape.test_config.ControllerTest;
 
 import java.util.stream.Stream;
 
@@ -25,7 +26,7 @@ import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(MemberController.class)
+@ControllerTest(MemberController.class)
 class MemberControllerTest {
 
     @Autowired

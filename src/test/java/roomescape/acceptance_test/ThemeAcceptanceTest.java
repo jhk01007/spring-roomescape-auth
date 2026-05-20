@@ -3,6 +3,7 @@ package roomescape.acceptance_test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,8 @@ import java.util.List;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
+import static roomescape.acceptance_test.MemberSetup.login;
+import static roomescape.acceptance_test.MemberSetup.signUp;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -34,9 +37,15 @@ public class ThemeAcceptanceTest {
     @LocalServerPort
     private int port;
 
+    private SessionFilter sessionFilter;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.port = port;
+        sessionFilter = new SessionFilter();
+        RestAssured.filters(sessionFilter);
+        signUp("test123", "password1", "test");
+        login("test123", "password1");
     }
 
     @Autowired
@@ -51,8 +60,8 @@ public class ThemeAcceptanceTest {
         ThemeCreateRequest request = new ThemeCreateRequest("brown", "설명", "섬네일");
         Integer themeId = createTheme(request);
 
-
         given().log().all()
+            .filter(sessionFilter)
         .when()
             .get("/themes")
         .then().log().all()
@@ -70,6 +79,7 @@ public class ThemeAcceptanceTest {
         Integer themeId = createTheme(request);
 
         given().log().all()
+                .filter(sessionFilter)
                 .pathParam("id", themeId)
                 .when()
                 .delete("/admin/themes/{id}")
@@ -104,10 +114,10 @@ public class ThemeAcceptanceTest {
             reservationTimeIds.add(createReservationTime(new ReservationTimeCreateRequest(LocalTime.of(i, 30))));
         }
 
-        createReservations("brown", date, reservationTimeIds, themeId, 13);
-        createReservations("pobi", date, reservationTimeIds, themeId2, 12);
-        createReservations("joy", date, reservationTimeIds, themeId3, 11);
-        createReservation("outOfRange", outOfRangeDate, reservationTimeIds.get(0), outOfRangeThemeId);
+        createReservations(date, reservationTimeIds, themeId, 13);
+        createReservations(date, reservationTimeIds, themeId2, 12);
+        createReservations(date, reservationTimeIds, themeId3, 11);
+        createReservation(outOfRangeDate, reservationTimeIds.get(0), outOfRangeThemeId);
 
         mutableClock.setFixed(baseDate);
 
@@ -150,32 +160,30 @@ public class ThemeAcceptanceTest {
     }
 
     private void createReservations(
-            String name,
             LocalDate date,
             List<Integer> reservationTimeIds,
             Integer themeId,
             int count
     ) throws JsonProcessingException {
         for (int i = 0; i < count; i++) {
-            createReservation(name + i, date, reservationTimeIds.get(i), themeId);
+            createReservation(date, reservationTimeIds.get(i), themeId);
         }
     }
 
-    private Integer createReservation(String name, LocalDate date, Integer reservationTimeId, Integer themeId) throws JsonProcessingException {
+    private Integer createReservation(LocalDate date, Integer reservationTimeId, Integer themeId) throws JsonProcessingException {
         ReservationCreateRequest request = new ReservationCreateRequest(
-                name,
                 date,
                 reservationTimeId.longValue(),
                 themeId.longValue());
 
         return given().log().all()
+                .filter(sessionFilter)
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(request))
                 .when()
                 .post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("guestName", equalTo(request.guestName()))
                 .body("date", equalTo(request.date().toString()))
                 .body("time.id", equalTo(reservationTimeId))
                 .body("theme.id", equalTo(themeId))

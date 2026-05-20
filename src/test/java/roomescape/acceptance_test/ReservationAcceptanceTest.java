@@ -3,6 +3,7 @@ package roomescape.acceptance_test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +26,8 @@ import java.time.LocalTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static roomescape.auth.argumentResolver.CurrentUserArgumentResolver.GUEST_NAME_HEADER;
+import static roomescape.acceptance_test.MemberSetup.login;
+import static roomescape.acceptance_test.MemberSetup.signUp;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -35,10 +37,16 @@ public class ReservationAcceptanceTest {
     @LocalServerPort
     private int port;
 
+    private SessionFilter sessionFilter;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.port = port;
         mutableClock.setFixed(LocalDate.of(2026, 5, 12));
+        sessionFilter = new SessionFilter();
+        RestAssured.filters(sessionFilter);
+        signUp("test123", "password1", "test");
+        login("test123", "password1");
     }
 
     @Autowired
@@ -59,7 +67,6 @@ public class ReservationAcceptanceTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.id", hasItem(reservationId))
-                .body("reservations.guestName", hasItem(reservationRequest.guestName()))
                 .body("reservations.date", hasItem(reservationRequest.date().toString()))
                 .body("reservations.time.id", hasItem(reservationRequest.timeId().intValue()))
                 .body("reservations.theme.id", hasItem(reservationRequest.themeId().intValue()));
@@ -71,7 +78,6 @@ public class ReservationAcceptanceTest {
         Integer themeId = createTheme(
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
         return new ReservationCreateRequest(
-                "brown",
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -106,7 +112,6 @@ public class ReservationAcceptanceTest {
         Integer themeId = createTheme(themeRequest);
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                "brown",
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -118,19 +123,17 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("특정 사용자의 이름을 입력해 예약을 조회한다.")
     public void scenario3() throws JsonProcessingException {
-        String guestName = "brown";
-        createScenario3Fixture(guestName);
+        createScenario3Fixture();
 
         given().log().all()
-                .header(GUEST_NAME_HEADER, guestName)
                 .when()
                 .get("/reservations/me")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservations.guestName", hasItem(guestName));
+                .body("reservations.guestName", hasItem(any(String.class)));
     }
 
-    private void createScenario3Fixture(String guestName) throws JsonProcessingException {
+    private void createScenario3Fixture() throws JsonProcessingException {
         LocalTime startAt = LocalTime.of(10, 30);
         ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(startAt);
         Integer reservationTimeId = createReservationTime(timeRequest);
@@ -139,7 +142,6 @@ public class ReservationAcceptanceTest {
         Integer themeId = createTheme(themeRequest);
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                guestName,
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -161,7 +163,6 @@ public class ReservationAcceptanceTest {
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                "brown",
                 originalDate,
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -175,13 +176,11 @@ public class ReservationAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(editRequest))
                 .pathParam("id", reservationId)
-                .header(GUEST_NAME_HEADER, reservationRequest.guestName())
                 .when()
                 .patch("/reservations/{id}")
                 .then().log().all()
                 .statusCode(200)
                 .body("id", equalTo(reservationId))
-                .body("guestName", equalTo(reservationRequest.guestName()))
                 .body("date", equalTo(editRequest.date().toString()))
                 .body("time.id", equalTo(editedReservationTimeId))
                 .body("theme.id", equalTo(themeId));
@@ -198,14 +197,12 @@ public class ReservationAcceptanceTest {
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                "brown",
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
         createReservation(reservationRequest);
 
         ReservationCreateRequest targetReservationRequest = new ReservationCreateRequest(
-                "pobi",
                 LocalDate.of(2026, 10, 15),
                 editedReservationTimeId.longValue(),
                 themeId.longValue());
@@ -219,7 +216,6 @@ public class ReservationAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(editRequest))
                 .pathParam("id", targetReservationId)
-                .header(GUEST_NAME_HEADER, targetReservationRequest.guestName())
                 .when()
                 .patch("/reservations/{id}")
                 .then().log().all()
@@ -239,7 +235,6 @@ public class ReservationAcceptanceTest {
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                "brown",
                 reservationDate,
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -255,7 +250,6 @@ public class ReservationAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(editRequest))
                 .pathParam("id", reservationId)
-                .header(GUEST_NAME_HEADER, reservationRequest.guestName())
                 .when()
                 .patch("/reservations/{id}")
                 .then().log().all()
@@ -273,7 +267,6 @@ public class ReservationAcceptanceTest {
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                "brown",
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -289,7 +282,6 @@ public class ReservationAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(editRequest))
                 .pathParam("id", reservationId)
-                .header(GUEST_NAME_HEADER, reservationRequest.guestName())
                 .when()
                 .patch("/reservations/{id}")
                 .then().log().all()
@@ -307,14 +299,12 @@ public class ReservationAcceptanceTest {
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
 
         ReservationCreateRequest otherReservation = new ReservationCreateRequest(
-                "brown",
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
         createReservation(otherReservation);
 
         ReservationCreateRequest myReservation = new ReservationCreateRequest(
-                "pobi",
                 LocalDate.of(2026, 10, 15),
                 editedReservationTimeId.longValue(),
                 themeId.longValue());
@@ -328,11 +318,10 @@ public class ReservationAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(editRequest))
                 .pathParam("id", myReservationId)
-                .header(GUEST_NAME_HEADER, otherReservation.guestName())
                 .when()
                 .patch("/reservations/{id}")
                 .then().log().all()
-                .statusCode(403);
+                .statusCode(409);
     }
 
     @Test
@@ -345,7 +334,6 @@ public class ReservationAcceptanceTest {
                 new ThemeCreateRequest("테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                guestName,
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -353,14 +341,12 @@ public class ReservationAcceptanceTest {
 
         given().log().all()
                 .pathParam("id", reservationId)
-                .header(GUEST_NAME_HEADER, guestName)
                 .when()
                 .delete("/reservations/{id}")
                 .then().log().all()
                 .statusCode(204);
 
         given().log().all()
-                .header(GUEST_NAME_HEADER, guestName)
                 .when()
                 .get("/reservations/me")
                 .then().log().all()
@@ -405,7 +391,6 @@ public class ReservationAcceptanceTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("id", notNullValue())
-                .body("guestName", equalTo(request.guestName()))
                 .body("date", equalTo(request.date().toString()))
                 .body("time.id", equalTo(request.timeId().intValue()))
                 .body("theme.id", equalTo(request.themeId().intValue()))

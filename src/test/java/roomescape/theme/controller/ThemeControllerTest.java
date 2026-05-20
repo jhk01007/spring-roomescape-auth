@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import roomescape.test_config.ControllerTest;
 import roomescape.theme.controller.dto.ThemeListResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = ThemeController.class)
+@ControllerTest(ThemeController.class)
 class ThemeControllerTest {
 
     @Autowired
@@ -36,6 +37,7 @@ class ThemeControllerTest {
 
     @MockitoBean
     private ThemeService themeService;
+
 
 
     @Test
@@ -54,6 +56,7 @@ class ThemeControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+
 
         ThemeListResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),

@@ -3,6 +3,7 @@ package roomescape.acceptance_test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +21,8 @@ import java.time.LocalTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static roomescape.acceptance_test.MemberSetup.login;
+import static roomescape.acceptance_test.MemberSetup.signUp;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,9 +31,15 @@ public class ReservationTimeAcceptanceTest {
     @LocalServerPort
     private int port;
 
+    private SessionFilter sessionFilter;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.port = port;
+        sessionFilter = new SessionFilter();
+        RestAssured.filters(sessionFilter);
+        signUp("test123", "password1", "test");
+        login("test123", "password1");
     }
 
     @Autowired
@@ -86,7 +95,6 @@ public class ReservationTimeAcceptanceTest {
         Integer themeId = createTheme(themeRequest);
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                "brown",
                 date,
                 reservationTimeId.longValue(),
                 themeId.longValue());
@@ -143,7 +151,6 @@ public class ReservationTimeAcceptanceTest {
                 .post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("guestName", equalTo(request.guestName()))
                 .body("date", equalTo(request.date().toString()))
                 .body("time.id", equalTo(reservationTimeId))
                 .body("theme.id", equalTo(themeId))

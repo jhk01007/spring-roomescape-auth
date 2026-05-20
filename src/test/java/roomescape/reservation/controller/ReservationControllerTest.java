@@ -18,6 +18,7 @@ import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
+import roomescape.test_config.ControllerTest;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -31,8 +32,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -42,11 +42,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.auth.argumentResolver.CurrentUserArgumentResolver.GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.INVALID_GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.VALIDATION_ERROR;
 
-@WebMvcTest(controllers = ReservationController.class)
+@ControllerTest(ReservationController.class)
 class ReservationControllerTest {
 
     @Autowired
@@ -71,7 +70,6 @@ class ReservationControllerTest {
                 .willReturn(reservation);
 
         ReservationCreateRequest request = new ReservationCreateRequest(
-                "브라운",
                 LocalDate.of(2023, 8, 5),
                 1L,
                 1L
@@ -126,16 +124,15 @@ class ReservationControllerTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            ",2023-08-05,1,1",
-            "브라운,,1,1",
-            "브라운,2023-08-05,,1",
-            "브라운,2023-08-05,1,",
+            ",1,1",
+            "2023-08-05,,1",
+            "2023-08-05,1,",
     })
     @DisplayName("예약을 생성하는 요청을 할 때 특정 요청값이 비어있으면 에러가 발생한다.")
-    public void create_fail1(String guestName, String date, Long timeId, Long themeId) throws Exception {
+    public void create_fail1(String date, Long timeId, Long themeId) throws Exception {
         // given
         LocalDate reservationDate = date == null ? null : LocalDate.parse(date);
-        ReservationCreateRequest request = new ReservationCreateRequest(guestName, reservationDate, timeId, themeId);
+        ReservationCreateRequest request = new ReservationCreateRequest(reservationDate, timeId, themeId);
 
         // when then
         mockMvc.perform(
@@ -171,17 +168,6 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약자 이름 헤더가 없으면 에러 응답을 반환한다.")
-    public void getListByGuestName_fail1() throws Exception {
-        // when then
-        mockMvc.perform(get("/reservations/me"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(INVALID_GUEST_NAME_HEADER.code()))
-                .andExpect(jsonPath("$.message").value(INVALID_GUEST_NAME_HEADER.message()));
-    }
-
-    @Test
     @DisplayName("예약자 이름으로 된 예약을 조회하는 요청을 하면 특정 사용자의 예약 정보가 응답으로 반환된다.")
     public void getListByGuestName_success() throws Exception {
         // given
@@ -197,8 +183,7 @@ class ReservationControllerTest {
 
         // when then
         MvcResult result = mockMvc.perform(
-                        get("/reservations/me")
-                                .header(GUEST_NAME_HEADER, guestName))
+                        get("/reservations/me"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
@@ -243,12 +228,10 @@ class ReservationControllerTest {
         );
 
         // when then
-        String guestNameHeader = URLEncoder.encode("브라운", StandardCharsets.UTF_8);
         MvcResult result = mockMvc.perform(
                         patch("/reservations/{id}", reservationId)
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header(GUEST_NAME_HEADER, guestNameHeader)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -284,8 +267,7 @@ class ReservationControllerTest {
         mockMvc.perform(
                         patch("/reservations/{id}", reservationId)
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header(GUEST_NAME_HEADER, "브라운"))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -306,8 +288,7 @@ class ReservationControllerTest {
         mockMvc.perform(
                         patch("/reservations/{id}", reservationId)
                                 .content(request)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header(GUEST_NAME_HEADER, "브라운"))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(VALIDATION_ERROR.code()));
@@ -323,8 +304,7 @@ class ReservationControllerTest {
         mockMvc.perform(
                         patch("/reservations/{id}", "abc")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header(GUEST_NAME_HEADER, "브라운"))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(VALIDATION_ERROR.code()));
@@ -335,18 +315,16 @@ class ReservationControllerTest {
     public void delete_success() throws Exception {
         // given
         Long reservationId = 1L;
-        String guestNameHeader = "브라운";
 
         // when then
         mockMvc.perform(
-                        delete("/reservations/{id}", reservationId)
-                                .header(GUEST_NAME_HEADER, guestNameHeader))
+                        delete("/reservations/{id}", reservationId))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
         then(reservationService)
                 .should()
-                .deleteMine(reservationId, any());
+                .deleteMine(eq(reservationId), any(Member.class));
     }
 
     private static Member member(Long id, String nickname) {
