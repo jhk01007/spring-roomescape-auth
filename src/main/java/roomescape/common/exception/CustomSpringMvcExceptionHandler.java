@@ -10,10 +10,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.Objects;
 
+import static roomescape.common.exception.GlobalErrorCode.NOT_FOUND;
 import static roomescape.common.exception.GlobalErrorCode.VALIDATION_ERROR;
 
 /**
@@ -89,6 +91,16 @@ public class CustomSpringMvcExceptionHandler {
         return ResponseEntity
                 .status(VALIDATION_ERROR.status())
                 .body(ErrorResponse.of(pathFrom(request), VALIDATION_ERROR.code(), message));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(
+            NoResourceFoundException exception,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(NOT_FOUND.status())
+                .body(ErrorResponse.of(pathFrom(request), NOT_FOUND.code(), NOT_FOUND.message()));
     }
 
     private String pathFrom(HttpServletRequest request) {

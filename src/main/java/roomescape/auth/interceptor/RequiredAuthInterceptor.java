@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.method.HandlerMethod;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 
@@ -14,6 +15,10 @@ public class RequiredAuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
+
         if (request.getAttribute(LOGIN_MEMBER_ID) != null) {
             return true;
         }

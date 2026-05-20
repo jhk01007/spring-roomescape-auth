@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>방탈출 모바일</title>
+  <link rel="stylesheet" href="/css/mobile.css?v=mobile-token-2" />
+</head>
+<body>
+  <main class="mobile-stage">
+    <section class="phone" aria-label="방탈출 모바일 앱">
+      <header class="app-header">
+        <div>
+          <p class="kicker">JWT Mobile</p>
+          <h1>방탈출 예약</h1>
+        </div>
+        <button id="logoutButton" class="ghost-button" type="button" hidden>로그아웃</button>
+      </header>
+
+      <section id="authScreen" class="screen auth-screen">
+        <div class="auth-card">
+          <div class="segmented" aria-label="인증 화면">
+            <button id="loginTab" class="segment active" type="button">로그인</button>
+            <button id="signupTab" class="segment" type="button">회원가입</button>
+          </div>
+
+          <form id="loginForm" class="form-grid">
+            <label class="field">
+              <span>아이디</span>
+              <input id="loginId" type="text" autocomplete="username" />
+            </label>
+            <label class="field">
+              <span>비밀번호</span>
+              <input id="loginPassword" type="password" autocomplete="current-password" />
+            </label>
+            <button id="loginButton" class="primary-button" type="submit">토큰 로그인</button>
+          </form>
+
+          <form id="signupForm" class="form-grid" hidden>
+            <label class="field">
+              <span>아이디</span>
+              <input id="signupLoginId" type="text" autocomplete="username" />
+            </label>
+            <label class="field">
+              <span>비밀번호</span>
+              <input id="signupPassword" type="password" autocomplete="new-password" />
+            </label>
+            <label class="field">
+              <span>닉네임</span>
+              <input id="signupNickname" type="text" autocomplete="nickname" />
+            </label>
+            <button id="signupButton" class="primary-button" type="submit">회원가입</button>
+          </form>
+        </div>
+        <p id="authMessage" class="message"></p>
+      </section>
+
+      <section id="appScreen" class="screen app-screen" hidden>
+        <section class="profile-card">
+          <div>
+            <span class="small-label">로그인 사용자</span>
+            <strong id="userLabel">-</strong>
+          </div>
+          <span class="token-badge">Bearer</span>
+        </section>
+
+        <nav class="tabbar" aria-label="모바일 기능">
+          <button class="tab-button active" type="button" data-view="reserve">예약</button>
+          <button class="tab-button" type="button" data-view="mine">내 예약</button>
+        </nav>
+
+        <section id="reserveView" class="view-grid">
+          <label class="field compact">
+            <span>예약 날짜</span>
+            <input id="dateInput" type="date" />
+          </label>
+
+          <div class="section-title">
+            <h2>인기 테마</h2>
+            <span id="popularCount">0개</span>
+          </div>
+          <div id="popularList" class="popular-list" aria-label="인기 테마 목록"></div>
+
+          <div class="section-title">
+            <h2>테마 선택</h2>
+            <span id="themeCount">0개</span>
+          </div>
+          <div id="themeList" class="theme-list" aria-label="테마 목록"></div>
+
+          <div class="section-title">
+            <h2>시간 선택</h2>
+            <span id="timeCount">0개 가능</span>
+          </div>
+          <div id="timeGrid" class="time-grid" aria-label="예약 가능한 시간"></div>
+
+          <section class="summary-card">
+            <div>
+              <span class="small-label">선택한 예약</span>
+              <strong id="summaryText">테마와 시간을 선택해주세요.</strong>
+            </div>
+            <button id="reserveButton" class="primary-button" type="button" disabled>예약하기</button>
+          </section>
+          <p id="reserveMessage" class="message"></p>
+        </section>
+
+        <section id="mineView" class="view-grid" hidden>
+          <div class="section-title">
+            <h2>내 예약</h2>
+            <span id="reservationCount">0건</span>
+          </div>
+          <p id="reservationMessage" class="message"></p>
+          <div id="reservationList" class="reservation-list" aria-label="내 예약 목록"></div>
+
+          <form id="editForm" class="edit-card" hidden>
+            <div class="section-title">
+              <h2 id="editTitle">예약 수정</h2>
+              <button id="editCancelButton" class="ghost-button" type="button">닫기</button>
+            </div>
+            <label class="field compact">
+              <span>예약 날짜</span>
+              <input id="editDate" type="date" />
+            </label>
+            <label class="field compact">
+              <span>예약 시간</span>
+              <select id="editTime"></select>
+            </label>
+            <button id="editButton" class="primary-button" type="submit" disabled>수정하기</button>
+            <p id="editMessage" class="message"></p>
+          </form>
+        </section>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="/js/mobile-api.js?v=mobile-token-2" defer></script>
+  <script src="/js/mobile-auth.js?v=mobile-token-2" defer></script>
+  <script src="/js/mobile-app.js?v=mobile-token-2" defer></script>
+</body>
+</html>

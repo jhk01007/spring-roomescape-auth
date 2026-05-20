@@ -1,5 +1,6 @@
 package roomescape.page;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -19,5 +20,15 @@ public class PageController {
     @GetMapping("/admin")
     public String admin() {
         return "forward:/admin.html";
+    }
+
+    @GetMapping("/mobile")
+    public String mobile() {
+        return "forward:/mobile.html";
+    }
+
+    @GetMapping("/favicon.ico")
+    public ResponseEntity<Void> favicon() {
+        return ResponseEntity.noContent().build();
     }
 }

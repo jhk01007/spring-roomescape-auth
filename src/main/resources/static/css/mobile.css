@@ -1,0 +1,512 @@
+:root {
+  --bg: #ebe8df;
+  --phone: #151c1f;
+  --surface: #fffdf8;
+  --surface-2: #f4f0e8;
+  --text: #24211d;
+  --muted: #746d64;
+  --line: #ddd5c7;
+  --accent: #0e7372;
+  --accent-dark: #0b5555;
+  --rust: #b84f2f;
+  --blue: #315d91;
+  --danger: #9a2f2f;
+  --shadow: 0 24px 70px rgba(31, 28, 22, 0.2);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.mobile-stage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.phone {
+  width: min(430px, 100%);
+  height: min(860px, calc(100vh - 48px));
+  min-height: 680px;
+  border: 10px solid var(--phone);
+  border-radius: 30px;
+  background: #fbf8f0;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  position: relative;
+}
+
+.app-header {
+  min-height: 88px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+  background: #fff9ed;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kicker,
+.small-label {
+  display: block;
+  margin: 0 0 4px;
+  color: var(--rust);
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.app-header h1,
+.section-title h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.app-header h1 {
+  font-size: 25px;
+  line-height: 1.1;
+}
+
+.screen {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px;
+  scrollbar-width: thin;
+}
+
+.auth-screen {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  background: var(--surface);
+}
+
+.auth-card,
+.profile-card,
+.summary-card,
+.edit-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(43, 35, 24, 0.08);
+}
+
+.auth-card {
+  padding: 14px;
+  display: grid;
+  gap: 16px;
+}
+
+.segmented,
+.tabbar {
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  padding: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.segment,
+.tab-button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.segment.active,
+.tab-button.active {
+  background: var(--accent);
+  color: white;
+}
+
+.form-grid,
+.view-grid,
+.edit-card {
+  display: grid;
+  gap: 13px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fffefa;
+  color: var(--text);
+  padding: 0 13px;
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14, 115, 114, 0.14);
+}
+
+.field.compact input,
+.field.compact select {
+  min-height: 44px;
+}
+
+.primary-button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: white;
+  font-weight: 950;
+}
+
+.primary-button:disabled {
+  background: #aebbb7;
+}
+
+.ghost-button {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.message {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 750;
+}
+
+.message.ok {
+  color: var(--accent);
+}
+
+.message.error {
+  color: var(--danger);
+}
+
+.app-screen {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 14px;
+}
+
+.profile-card {
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-card strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.token-badge {
+  border-radius: 999px;
+  background: #e7f6f2;
+  color: var(--accent-dark);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-title h2 {
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.section-title span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.popular-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(150px, 68%);
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.popular-card,
+.theme-card,
+.reservation-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffefa;
+}
+
+.popular-card {
+  min-height: 98px;
+  padding: 11px;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+}
+
+.popular-rank {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--rust);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.theme-list,
+.reservation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.theme-card {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  text-align: left;
+}
+
+.theme-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14, 115, 114, 0.12);
+}
+
+.theme-card img {
+  width: 92px;
+  aspect-ratio: 4 / 3;
+  border-radius: 9px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.theme-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.popular-name,
+.theme-name,
+.reservation-title {
+  display: block;
+  color: var(--text);
+  font-weight: 950;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.popular-desc,
+.theme-desc,
+.reservation-meta {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.theme-meta {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.time-button {
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fffefa;
+  color: var(--text);
+  font-weight: 950;
+}
+
+.time-button.selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.time-button:disabled {
+  color: #aaa39a;
+  background: #ece8df;
+}
+
+.summary-card,
+.edit-card,
+.reservation-card {
+  padding: 13px;
+}
+
+.summary-card {
+  display: grid;
+  gap: 12px;
+}
+
+.summary-card strong {
+  display: block;
+  line-height: 1.35;
+}
+
+.reservation-card {
+  display: grid;
+  gap: 11px;
+}
+
+.reservation-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.secondary-button,
+.danger-button {
+  min-height: 40px;
+  border-radius: 9px;
+  font-weight: 950;
+}
+
+.secondary-button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.danger-button {
+  border: 1px solid rgba(154, 47, 47, 0.24);
+  background: #fff7f4;
+  color: var(--danger);
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.72);
+  padding: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.toast {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  border: 1px solid rgba(14, 115, 114, 0.24);
+  border-radius: 12px;
+  background: #f4fffb;
+  color: #123f3e;
+  padding: 13px;
+  box-shadow: 0 14px 32px rgba(31, 28, 22, 0.18);
+  display: none;
+  font-size: 13px;
+  line-height: 1.45;
+  z-index: 10;
+}
+
+.toast.show {
+  display: block;
+}
+
+.toast strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+@media (max-width: 520px) {
+  .mobile-stage {
+    padding: 0;
+  }
+
+  .phone {
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .screen {
+    padding: 14px;
+  }
+}
