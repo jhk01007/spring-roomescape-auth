@@ -27,7 +27,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
+import static roomescape.auth.interceptor.AuthInterceptor.LOGIN_MEMBER_ID;
 
 @ControllerTest(AuthController.class)
 class AuthControllerTest {
