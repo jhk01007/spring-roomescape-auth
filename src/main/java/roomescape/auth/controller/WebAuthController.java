@@ -12,13 +12,13 @@ import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
 
-import static roomescape.auth.interceptor.AuthInterceptor.LOGIN_MEMBER_ID;
+import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
 
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
-public class AuthController {
+@RequestMapping("/auth/web")
+public class WebAuthController {
 
     private final AuthService authService;
 

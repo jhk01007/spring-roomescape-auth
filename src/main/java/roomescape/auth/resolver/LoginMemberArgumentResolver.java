@@ -13,7 +13,7 @@ import roomescape.common.exception.GlobalErrorCode;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 
-import static roomescape.auth.interceptor.AuthInterceptor.LOGIN_MEMBER_ID;
+import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
 
 
 @RequiredArgsConstructor

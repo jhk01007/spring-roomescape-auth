@@ -2,7 +2,6 @@ package roomescape.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,10 +27,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.auth.interceptor.AuthInterceptor.LOGIN_MEMBER_ID;
+import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
 
-@ControllerTest(AuthController.class)
-class AuthControllerTest {
+@ControllerTest(WebAuthController.class)
+class WebAuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,7 +55,7 @@ class AuthControllerTest {
 
         // when then
         MvcResult result = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/auth/login")
+                        MockMvcRequestBuilders.post("/auth/web/login")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
@@ -80,7 +79,7 @@ class AuthControllerTest {
     public void login_fail1(LoginRequest request) throws Exception {
         // when then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/auth/login")
+                        MockMvcRequestBuilders.post("/auth/web/login")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
@@ -104,7 +103,7 @@ class AuthControllerTest {
 
         // when
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/auth/logout")
+                        MockMvcRequestBuilders.post("/auth/web/logout")
                                 .session(session)
                 )
                 .andDo(print())
