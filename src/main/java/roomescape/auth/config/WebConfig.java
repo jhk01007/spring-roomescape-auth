@@ -1,29 +1,29 @@
-package roomescape.common.config;
+package roomescape.auth.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.auth.argumentResolver.CurrentUserArgumentResolver;
-import roomescape.auth.interceptor.UserAuthInterceptor;
+import roomescape.auth.argumentResolver.LoginMemberArgumentResolver;
+import roomescape.auth.interceptor.AuthInterceptor;
 
 import java.util.List;
 
-@Configuration
+@Component
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final CurrentUserArgumentResolver currentUserArgumentResolver;
+    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(currentUserArgumentResolver);
+        resolvers.add(loginMemberArgumentResolver);
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new UserAuthInterceptor())
+        registry.addInterceptor(new AuthInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/members",

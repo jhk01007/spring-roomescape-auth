@@ -15,11 +15,9 @@ import roomescape.member.repository.MemberRepository;
 
 import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
 
-@Component
 @RequiredArgsConstructor
-public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
-
-    public static final String GUEST_NAME_HEADER = "X-Guest-Name";
+@Component
+public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final MemberRepository memberRepository;
 

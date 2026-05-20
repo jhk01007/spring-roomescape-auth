@@ -9,7 +9,7 @@ import roomescape.common.exception.GlobalErrorCode;
 
 import static roomescape.auth.interceptor.AuthConst.LOGIN_MEMBER_ID;
 
-public class UserAuthInterceptor implements HandlerInterceptor {
+public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession(false);
