@@ -15,7 +15,7 @@ CREATE TABLE reservation_time
     deleted_at   TIMESTAMP,
     delete_token BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
-    UNIQUE (start_at, delete_token)
+    CONSTRAINT uk_reservation_time_start_at_delete_token UNIQUE (start_at, delete_token)
 );
 
 CREATE TABLE member
@@ -27,8 +27,8 @@ CREATE TABLE member
     role     VARCHAR(20)  NOT NULL,
 
     PRIMARY KEY (id),
-    UNIQUE (login_id),
-    UNIQUE (nickname)
+    CONSTRAINT uk_member_login_id UNIQUE (login_id),
+    CONSTRAINT uk_member_nickname UNIQUE (nickname)
 );
 
 CREATE TABLE reservation
@@ -42,7 +42,7 @@ CREATE TABLE reservation
     delete_token BIGINT       NOT NULL DEFAULT 0,
 
     PRIMARY KEY (id),
-    UNIQUE (date, time_id, theme_id, delete_token),
+    CONSTRAINT uk_date_time_id_theme_id_delete_token UNIQUE (date, time_id, theme_id, delete_token),
     FOREIGN KEY (guest_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
