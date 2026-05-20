@@ -18,7 +18,7 @@ import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
-import roomescape.test_config.ControllerTest;
+import roomescape.test_config.web.ControllerTest;
 
 import java.util.stream.Stream;
 

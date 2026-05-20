@@ -1,23 +1,18 @@
 package roomescape.acceptance_test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
-import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
+import roomescape.acceptance_test.support.AcceptanceTest;
+import roomescape.acceptance_test.support.AcceptanceTestSupport;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
+import roomescape.test_config.clock.MutableClock;
+import roomescape.test_config.clock.TestClockConfig;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 import java.time.LocalDate;
@@ -26,34 +21,18 @@ import java.time.LocalTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static roomescape.acceptance_test.MemberSetup.login;
-import static roomescape.acceptance_test.MemberSetup.signUp;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AcceptanceTest
 @Import(TestClockConfig.class)
-public class ReservationAcceptanceTest {
-
-    @LocalServerPort
-    private int port;
-
-    private SessionFilter sessionFilter;
-
-    @BeforeEach
-    void setUp() throws JsonProcessingException {
-        RestAssured.port = port;
-        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
-        sessionFilter = new SessionFilter();
-        RestAssured.filters(sessionFilter);
-        signUp("test123", "password1", "test");
-        login("test123", "password1");
-    }
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Autowired
     private MutableClock mutableClock;
+
+    @Override
+    protected void beforeAuthenticate() {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
+    }
 
     @Test
     @DisplayName("예약 생성 후 관리자 페이지에서 예약 목록을 조회한다.")

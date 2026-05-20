@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;

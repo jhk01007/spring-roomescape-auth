@@ -13,12 +13,12 @@ import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.test_config.TestClockConfig;
+import roomescape.test_config.clock.TestClockConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.common.exception.DomainException;
-import roomescape.reservation.repository.JdbcReservationRepository;
-import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
-import roomescape.theme.repository.JdbcThemeRepository;
+import roomescape.reservation.infra.JdbcReservationRepository;
+import roomescape.reservationtime.infra.JdbcReservationTimeRepository;
+import roomescape.theme.infra.JdbcThemeRepository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;

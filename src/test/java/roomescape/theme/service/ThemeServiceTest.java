@@ -15,9 +15,9 @@ import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.repository.JdbcReservationRepository;
-import roomescape.theme.repository.JdbcThemeRepository;
-import roomescape.test_config.TestClockConfig;
+import roomescape.reservation.infra.JdbcReservationRepository;
+import roomescape.theme.infra.JdbcThemeRepository;
+import roomescape.test_config.clock.TestClockConfig;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;

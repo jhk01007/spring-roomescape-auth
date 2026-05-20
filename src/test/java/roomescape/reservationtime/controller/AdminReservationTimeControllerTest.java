@@ -13,7 +13,7 @@ import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
-import roomescape.test_config.ControllerTest;
+import roomescape.test_config.web.ControllerTest;
 
 import java.time.LocalTime;
 

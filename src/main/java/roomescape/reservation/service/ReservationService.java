@@ -10,9 +10,9 @@ import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.common.exception.DomainException;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;

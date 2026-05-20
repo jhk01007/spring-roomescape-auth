@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import roomescape.common.exception.DomainException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;

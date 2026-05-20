@@ -18,7 +18,7 @@ import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
-import roomescape.test_config.ControllerTest;
+import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -40,7 +40,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.common.exception.GlobalErrorCode.INVALID_GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.VALIDATION_ERROR;
 
 @ControllerTest(ReservationController.class)

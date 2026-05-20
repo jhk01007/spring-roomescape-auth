@@ -23,8 +23,10 @@ public class WebConfig implements WebMvcConfigurer {
     private final JwtAuthInterceptor jwtAuthInterceptor;
     private final RequiredAuthInterceptor requiredAuthInterceptor;
 
-    private static final List<String> UI_WHITE_LIST = List.of("/", "/index.html", "/admin", "/admin.html", "/login", "/login.html", "/signup", "/signup.html", "/css/**", "/js/**");
-    private static final List<String> API_WHITE_LIST = List.of("/members", "/auth/web/login", "/auth/web/logout", "/themes/**", "/times/**");
+    private static final List<String> UI_WHITE_LIST = List.of(
+            "/", "/index.html", "/admin", "/admin.html", "/login", "/login.html", "/signup", "/signup.html", "/css/**", "/js/**");
+    private static final List<String> API_WHITE_LIST = List.of(
+            "/members", "/auth/web/login", "/auth/web/logout", "/auth/mobile/login", "/auth/mobile/logout", "/themes/**", "/times/**");
     private static final List<String> WHITE_LIST = Stream.concat(UI_WHITE_LIST.stream(), API_WHITE_LIST.stream()).toList();
 
     @Override

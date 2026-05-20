@@ -1,6 +1,6 @@
 package roomescape.reservationtime.controller.dto;
 
-import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
+import roomescape.reservationtime.infra.dto.ReservationTimeAvailability;
 
 import java.time.LocalTime;
 

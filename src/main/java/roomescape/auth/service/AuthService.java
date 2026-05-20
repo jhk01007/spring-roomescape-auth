@@ -6,7 +6,7 @@ import roomescape.auth.domain.PasswordEncoder;
 import roomescape.common.exception.DomainException;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberErrorCode;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.domain.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor

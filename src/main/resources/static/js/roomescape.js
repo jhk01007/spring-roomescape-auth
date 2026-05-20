@@ -418,7 +418,7 @@ const API_BASE = "";
 
     async function logout() {
       try {
-        await postJson("/auth/logout", {});
+        await postJson("/auth/web/logout", {});
       } catch (error) {
         if (!isAuthorizationError(error)) {
           showToast("로그아웃 요청에 실패했습니다.", endpointMessageOr(error, "다시 시도해주세요."));
@@ -455,7 +455,7 @@ const API_BASE = "";
       setAuthMessage("로그인 요청 중입니다.");
 
       try {
-        await postJson("/auth/login", payload);
+        await postJson("/auth/web/login", payload);
         rememberCurrentUser({ loginId: payload.loginId, nickname: payload.loginId });
         elements.loginForm.reset();
         setAuthMessage("로그인되었습니다. 이제 예약 생성과 내 예약 조회를 사용할 수 있습니다.", "ok");

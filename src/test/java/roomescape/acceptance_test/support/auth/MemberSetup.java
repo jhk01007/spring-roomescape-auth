@@ -1,0 +1,26 @@
+package roomescape.acceptance_test.support.auth;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.http.ContentType;
+import roomescape.member.controller.dto.MemberCreateRequest;
+
+import static io.restassured.RestAssured.given;
+
+
+public class MemberSetup {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public static void signUp(String loginId, String password, String nickname) throws JsonProcessingException {
+        MemberCreateRequest request = new MemberCreateRequest(loginId, password, nickname);
+
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .body(objectMapper.writeValueAsString(request))
+                .when()
+                .post("/members")
+                .then().log().all()
+                .statusCode(201);
+    }
+}

@@ -11,8 +11,8 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.member.exception.MemberErrorCode;
-import roomescape.member.repository.JdbcMemberRepository;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.infra.JdbcMemberRepository;
+import roomescape.member.domain.repository.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

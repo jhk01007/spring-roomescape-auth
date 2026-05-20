@@ -11,7 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import roomescape.test_config.ControllerTest;
+import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;

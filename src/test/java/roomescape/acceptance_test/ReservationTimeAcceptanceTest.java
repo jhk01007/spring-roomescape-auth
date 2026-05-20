@@ -1,17 +1,11 @@
 package roomescape.acceptance_test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
-import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import roomescape.acceptance_test.support.AcceptanceTest;
+import roomescape.acceptance_test.support.AcceptanceTestSupport;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
@@ -21,29 +15,9 @@ import java.time.LocalTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static roomescape.acceptance_test.MemberSetup.login;
-import static roomescape.acceptance_test.MemberSetup.signUp;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationTimeAcceptanceTest {
-
-    @LocalServerPort
-    private int port;
-
-    private SessionFilter sessionFilter;
-
-    @BeforeEach
-    void setUp() throws JsonProcessingException {
-        RestAssured.port = port;
-        sessionFilter = new SessionFilter();
-        RestAssured.filters(sessionFilter);
-        signUp("test123", "password1", "test");
-        login("test123", "password1");
-    }
-
-    @Autowired
-    private ObjectMapper objectMapper;
+@AcceptanceTest
+public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("예약 시간 생성 후 목록에서 조회된다")

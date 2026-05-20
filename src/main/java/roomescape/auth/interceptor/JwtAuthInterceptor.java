@@ -17,8 +17,8 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
     public static final String LOGIN_MEMBER_ID = "loginMemberId";
     public static final String AUTH_EXCEPTION = "authException";
 
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String AUTHORIZATION_PREFIX = "Bearer ";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String AUTHORIZATION_PREFIX = "Bearer ";
 
     private final JwtProvider jwtProvider;
 
