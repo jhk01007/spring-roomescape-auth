@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>회원가입 - 방탈출 예약</title>
+  <link rel="stylesheet" href="/css/roomescape.css" />
+</head>
+<body data-page="signup">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div class="brand-text">
+            <div class="brand-title">방탈출 예약</div>
+            <div class="brand-subtitle">계정을 만들고 세션으로 예약</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <nav class="view-toggle" aria-label="화면 전환">
+            <a class="view-button" href="/">사용자</a>
+            <a class="view-button" href="/login">로그인</a>
+            <a class="view-button active" href="/signup">회원가입</a>
+            <a class="view-button" href="/admin">관리자</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="auth-panel auth-page-panel" aria-labelledby="signupTitle">
+        <div class="auth-head">
+          <div>
+            <p class="section-kicker">회원가입</p>
+            <h1 id="signupTitle" class="popular-title">새 계정 만들기</h1>
+          </div>
+          <a class="secondary-button" href="/login">로그인</a>
+        </div>
+
+        <form id="signupForm" class="auth-form single-auth-form">
+          <label class="field">
+            <span class="label">아이디</span>
+            <input id="signupLoginIdInput" class="name-input" type="text" autocomplete="username" />
+          </label>
+          <label class="field">
+            <span class="label">비밀번호</span>
+            <input id="signupPasswordInput" class="name-input" type="password" autocomplete="new-password" />
+          </label>
+          <label class="field">
+            <span class="label">닉네임</span>
+            <input id="signupNicknameInput" class="name-input" type="text" autocomplete="nickname" />
+          </label>
+          <button id="signupButton" class="primary-button" type="submit">회원가입</button>
+        </form>
+        <p id="authMessage" class="message"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/roomescape.js?v=split-pages-1" defer></script>
+</body>
+</html>

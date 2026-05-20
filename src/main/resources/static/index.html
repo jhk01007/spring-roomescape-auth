@@ -21,6 +21,8 @@
         <div class="topbar-actions">
           <nav class="view-toggle" aria-label="화면 전환">
             <a id="userTab" class="view-button active" href="/">사용자</a>
+            <a class="view-button" href="/login">로그인</a>
+            <a class="view-button" href="/signup">회원가입</a>
             <a id="adminTab" class="view-button" href="/admin">관리자</a>
           </nav>
           <div id="sourceStatus" class="status-pill">
@@ -70,13 +72,8 @@
         <aside class="summary-panel" aria-label="예약 요약">
           <div class="summary-head">
             <h2 class="summary-title">예약 정보</h2>
-            <span class="summary-badge">사용자</span>
+            <span id="summaryUser" class="summary-badge">비로그인</span>
           </div>
-
-          <label class="field">
-            <span class="label">예약자 이름</span>
-            <input id="nameInput" class="name-input" type="text" placeholder="이름" autocomplete="name" />
-          </label>
 
           <div class="summary-list">
             <div class="summary-row">
@@ -102,15 +99,11 @@
         <div class="lookup-head">
           <div class="lookup-title-group">
             <h2 id="lookupTitle" class="area-title">내 예약 조회</h2>
-            <span id="lookupCount" class="area-subtitle">예약자 이름으로 조회</span>
+            <span id="lookupCount" class="area-subtitle">로그인 사용자 기준 조회</span>
           </div>
-          <form id="lookupForm" class="lookup-form">
-            <label class="field">
-              <span class="label">예약자 이름</span>
-              <input id="lookupGuestName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
-            </label>
-            <button id="lookupButton" class="secondary-button" type="submit">조회</button>
-          </form>
+          <div class="lookup-actions">
+            <a id="lookupLoginButton" class="secondary-button" href="/login" hidden>로그인하기</a>
+          </div>
         </div>
         <p id="lookupMessage" class="message"></p>
         <div id="lookupList" class="lookup-list" aria-label="예약 조회 결과"></div>

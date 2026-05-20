@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>로그인 - 방탈출 예약</title>
+  <link rel="stylesheet" href="/css/roomescape.css" />
+</head>
+<body data-page="login">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div class="brand-text">
+            <div class="brand-title">방탈출 예약</div>
+            <div class="brand-subtitle">로그인 후 예약을 만들고 조회</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <nav class="view-toggle" aria-label="화면 전환">
+            <a class="view-button" href="/">사용자</a>
+            <a class="view-button active" href="/login">로그인</a>
+            <a class="view-button" href="/signup">회원가입</a>
+            <a class="view-button" href="/admin">관리자</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="auth-panel auth-page-panel" aria-labelledby="loginTitle">
+        <div class="auth-head">
+          <div>
+            <p class="section-kicker">로그인</p>
+            <h1 id="loginTitle" class="popular-title">회원 로그인</h1>
+          </div>
+          <a class="secondary-button" href="/signup">회원가입</a>
+        </div>
+
+        <form id="loginForm" class="auth-form single-auth-form">
+          <label class="field">
+            <span class="label">아이디</span>
+            <input id="loginIdInput" class="name-input" type="text" autocomplete="username" />
+          </label>
+          <label class="field">
+            <span class="label">비밀번호</span>
+            <input id="loginPasswordInput" class="name-input" type="password" autocomplete="current-password" />
+          </label>
+          <button id="loginButton" class="primary-button" type="submit">로그인</button>
+        </form>
+        <p id="authMessage" class="message"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/roomescape.js?v=split-pages-1" defer></script>
+</body>
+</html>

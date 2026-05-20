@@ -40,6 +40,10 @@
       max-width: 100%;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     .app-shell {
       min-height: 100vh;
       display: grid;
@@ -270,6 +274,85 @@
       grid-template-columns: minmax(0, 1fr) 360px;
       gap: 22px;
       align-items: start;
+    }
+
+    .auth-panel {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .auth-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .auth-status {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      padding: 0 13px;
+      font-size: 13px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .auth-status.logged-in {
+      color: var(--accent);
+      border-color: rgba(14, 111, 112, 0.35);
+    }
+
+    .lookup-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .auth-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .auth-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+      gap: 12px;
+      align-items: end;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 14px;
+    }
+
+    .auth-form:nth-child(2) {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    }
+
+    .auth-page-panel {
+      width: min(720px, 100%);
+      margin: 34px auto 0;
+      border-bottom: 0;
+    }
+
+    .single-auth-form,
+    .single-auth-form:nth-child(2) {
+      grid-template-columns: 1fr;
+    }
+
+    .form-title {
+      grid-column: 1 / -1;
+      font-size: 16px;
+      line-height: 1.25;
+      font-weight: 850;
     }
 
     .workspace {
@@ -962,6 +1045,9 @@
     @media (max-width: 980px) {
       .popular-band,
       .reservation-layout,
+      .auth-grid,
+      .auth-form,
+      .auth-form:nth-child(2),
       .control-strip,
       .lookup-head,
       .admin-layout,
@@ -1081,6 +1167,8 @@
 
       .admin-reserve-grid,
       .admin-time-grid,
+      .auth-head,
+      .lookup-actions,
       .lookup-form,
       .edit-grid,
       .edit-head {

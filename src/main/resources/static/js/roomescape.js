@@ -32,7 +32,8 @@ const API_BASE = "";
       adminAvailableTimes: [],
       adminReservationPage: 1,
       adminReservationSize: 20,
-      adminReservationHasNext: false
+      adminReservationHasNext: false,
+      currentUser: null
     };
 
     const demoThemes = Array.from({ length: 12 }, (_, index) => {
@@ -81,8 +82,45 @@ const API_BASE = "";
       return PAGE === "user";
     }
 
+    function isLoginPage() {
+      return PAGE === "login";
+    }
+
+    function isSignupPage() {
+      return PAGE === "signup";
+    }
+
+    function isAuthPage() {
+      return isLoginPage() || isSignupPage();
+    }
+
+    function restoreCurrentUser() {
+      try {
+        const raw = window.sessionStorage.getItem("roomescape.currentUser");
+        state.currentUser = raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        state.currentUser = null;
+      }
+    }
+
+    function rememberCurrentUser(user) {
+      state.currentUser = user;
+      window.sessionStorage.setItem("roomescape.currentUser", JSON.stringify(user));
+    }
+
     const elements = {
       sourceStatus: $("#sourceStatus"),
+      authStatus: $("#authStatus"),
+      authMessage: $("#authMessage"),
+      loginForm: $("#loginForm"),
+      loginIdInput: $("#loginIdInput"),
+      loginPasswordInput: $("#loginPasswordInput"),
+      loginButton: $("#loginButton"),
+      signupForm: $("#signupForm"),
+      signupLoginIdInput: $("#signupLoginIdInput"),
+      signupPasswordInput: $("#signupPasswordInput"),
+      signupNicknameInput: $("#signupNicknameInput"),
+      signupButton: $("#signupButton"),
       popularList: $("#popularList"),
       dateInput: $("#dateInput"),
       dateNote: $("#dateNote"),
@@ -91,6 +129,7 @@ const API_BASE = "";
       timeGrid: $("#timeGrid"),
       timeCount: $("#timeCount"),
       nameInput: $("#nameInput"),
+      summaryUser: $("#summaryUser"),
       summaryDate: $("#summaryDate"),
       summaryTheme: $("#summaryTheme"),
       summaryTime: $("#summaryTime"),
@@ -98,7 +137,7 @@ const API_BASE = "";
       formMessage: $("#formMessage"),
       lookupForm: $("#lookupForm"),
       lookupGuestName: $("#lookupGuestName"),
-      lookupButton: $("#lookupButton"),
+      lookupLoginButton: $("#lookupLoginButton"),
       lookupMessage: $("#lookupMessage"),
       lookupList: $("#lookupList"),
       lookupCount: $("#lookupCount"),
@@ -181,7 +220,14 @@ const API_BASE = "";
         signal: controller.signal
       }).finally(() => window.clearTimeout(timer));
       if (!response.ok) {
-        throw new Error(await errorMessageFrom(response));
+        throw await apiErrorFrom(response);
+      }
+      if (response.status === 204) {
+        return null;
+      }
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return null;
       }
       return response.json();
     }
@@ -196,7 +242,14 @@ const API_BASE = "";
         body: JSON.stringify(body)
       });
       if (!response.ok) {
-        throw new Error(await errorMessageFrom(response));
+        throw await apiErrorFrom(response);
+      }
+      if (response.status === 204) {
+        return null;
+      }
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return null;
       }
       return response.json();
     }
@@ -212,7 +265,7 @@ const API_BASE = "";
         body: JSON.stringify(body)
       });
       if (!response.ok) {
-        throw new Error(await errorMessageFrom(response));
+        throw await apiErrorFrom(response);
       }
       return response.json();
     }
@@ -226,7 +279,7 @@ const API_BASE = "";
         }
       });
       if (!response.ok) {
-        throw new Error(await errorMessageFrom(response));
+        throw await apiErrorFrom(response);
       }
     }
 
@@ -236,15 +289,25 @@ const API_BASE = "";
       };
     }
 
-    async function errorMessageFrom(response) {
+    async function apiErrorFrom(response) {
       const fallback = `HTTP ${response.status}`;
       const contentType = response.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
-        return fallback;
+        return new Error(fallback);
       }
 
       try {
         const body = await response.json();
+        const error = new Error(messageFromErrorBody(body, fallback));
+        error.code = body.code;
+        error.status = response.status;
+        return error;
+      } catch (error) {
+        return new Error(fallback);
+      }
+    }
+
+    function messageFromErrorBody(body, fallback) {
         if (Array.isArray(body.messages) && body.messages.length > 0) {
           return body.messages.filter(Boolean).join("\n");
         }
@@ -252,9 +315,20 @@ const API_BASE = "";
           return body.message;
         }
         return fallback;
-      } catch (error) {
-        return fallback;
-      }
+    }
+
+    function redirectToLogin() {
+      window.alert("로그인이 필요한 화면입니다.");
+      window.location.href = "/login";
+    }
+
+    function isAuthorizationError(error) {
+      return error instanceof Error && error.code === "AUTHORIZATION_ERROR";
+    }
+
+    function clearCurrentUser() {
+      state.currentUser = null;
+      window.sessionStorage.removeItem("roomescape.currentUser");
     }
 
     function endpointMessageOr(error, fallback) {
@@ -262,6 +336,107 @@ const API_BASE = "";
         return error.message;
       }
       return fallback;
+    }
+
+    function setAuthMessage(text, type = "") {
+      if (!elements.authMessage) {
+        return;
+      }
+      elements.authMessage.textContent = text;
+      elements.authMessage.className = `message${type ? ` ${type}` : ""}`;
+    }
+
+    function fillLoginIdFromQuery() {
+      if (!isLoginPage() || !elements.loginIdInput) {
+        return;
+      }
+
+      const loginId = new URLSearchParams(window.location.search).get("loginId");
+      if (loginId) {
+        elements.loginIdInput.value = loginId;
+        elements.loginPasswordInput.focus();
+      }
+    }
+
+    function updateAuthUi() {
+      if (!isUserPage() || !elements.authStatus) {
+        if (isUserPage() && elements.summaryUser) {
+          const loggedIn = Boolean(state.currentUser);
+          const nickname = state.currentUser?.nickname || state.currentUser?.loginId || "회원";
+          elements.summaryUser.textContent = loggedIn ? nickname : "비로그인";
+          syncSummary();
+        }
+        return;
+      }
+
+      const loggedIn = Boolean(state.currentUser);
+      const nickname = state.currentUser?.nickname || state.currentUser?.loginId || "회원";
+      elements.authStatus.textContent = loggedIn ? `${nickname}님 로그인 중` : "로그인이 필요합니다.";
+      elements.authStatus.classList.toggle("logged-in", loggedIn);
+      elements.summaryUser.textContent = loggedIn ? nickname : "비로그인";
+      syncSummary();
+    }
+
+    async function signUp(event) {
+      event.preventDefault();
+      const payload = {
+        loginId: elements.signupLoginIdInput.value.trim(),
+        password: elements.signupPasswordInput.value,
+        nickname: elements.signupNicknameInput.value.trim()
+      };
+
+      if (!payload.loginId || !payload.password || !payload.nickname) {
+        setAuthMessage("아이디, 비밀번호, 닉네임을 모두 입력해주세요.", "error");
+        return;
+      }
+
+      elements.signupButton.disabled = true;
+      setAuthMessage("회원가입 요청 중입니다.");
+
+      try {
+        const member = await postJson("/members", payload);
+        elements.signupForm.reset();
+        if (elements.loginIdInput && elements.loginPasswordInput) {
+          elements.loginIdInput.value = payload.loginId;
+          elements.loginPasswordInput.value = payload.password;
+        }
+        window.alert(`${member?.nickname || payload.nickname}님, 회원가입이 완료되었습니다.`);
+        window.location.href = `/login?loginId=${encodeURIComponent(payload.loginId)}`;
+      } catch (error) {
+        setAuthMessage(endpointMessageOr(error, "회원가입에 실패했습니다."), "error");
+      } finally {
+        elements.signupButton.disabled = false;
+      }
+    }
+
+    async function login(event) {
+      event.preventDefault();
+      const payload = {
+        loginId: elements.loginIdInput.value.trim(),
+        password: elements.loginPasswordInput.value
+      };
+
+      if (!payload.loginId || !payload.password) {
+        setAuthMessage("아이디와 비밀번호를 입력해주세요.", "error");
+        return;
+      }
+
+      elements.loginButton.disabled = true;
+      setAuthMessage("로그인 요청 중입니다.");
+
+      try {
+        await postJson("/auth/login", payload);
+        rememberCurrentUser({ loginId: payload.loginId, nickname: payload.loginId });
+        elements.loginForm.reset();
+        setAuthMessage("로그인되었습니다. 이제 예약 생성과 내 예약 조회를 사용할 수 있습니다.", "ok");
+        window.location.href = "/";
+      } catch (error) {
+        clearCurrentUser();
+        updateAuthUi();
+        setAuthMessage(endpointMessageOr(error, "아이디 또는 비밀번호를 확인해주세요."), "error");
+      } finally {
+        elements.loginButton.disabled = false;
+      }
     }
 
     async function getReservationListData(page = state.adminReservationPage, size = state.adminReservationSize) {
@@ -423,9 +598,9 @@ const API_BASE = "";
       elements.summaryTheme.textContent = theme ? theme.name : "-";
       elements.summaryTime.textContent = time ? normalizeTime(time.startAt) : "-";
 
-      const canReserve = Boolean(elements.nameInput.value.trim() && theme && time);
+      const canReserve = Boolean(state.currentUser && theme && time);
       elements.reserveButton.disabled = !canReserve;
-      elements.formMessage.textContent = canReserve ? "" : "이름, 테마, 시간을 모두 선택하면 예약할 수 있습니다.";
+      elements.formMessage.textContent = canReserve ? "" : "로그인 후 테마와 시간을 선택하면 예약할 수 있습니다.";
       elements.formMessage.className = "message";
     }
 
@@ -504,14 +679,17 @@ const API_BASE = "";
     async function reserve() {
       const theme = selectedTheme();
       const time = selectedTime();
-      const name = elements.nameInput.value.trim();
-      if (!theme || !time || !name) {
+      if (!state.currentUser) {
+        elements.formMessage.textContent = "로그인 후 예약할 수 있습니다.";
+        elements.formMessage.className = "message error";
+        return;
+      }
+      if (!theme || !time) {
         syncSummary();
         return;
       }
 
       const payload = {
-        guestName: name,
         date: elements.dateInput.value,
         timeId: time.id,
         themeId: theme.id
@@ -524,7 +702,7 @@ const API_BASE = "";
         } else {
           createdReservation = {
             id: getNextId(state.demoReservations),
-            guestName: payload.guestName,
+            guestName: state.currentUser.nickname || state.currentUser.loginId,
             date: payload.date,
             themeId: payload.themeId,
             timeId: payload.timeId
@@ -533,10 +711,10 @@ const API_BASE = "";
         }
         state.reservations = [...state.reservations, createdReservation];
 
-        showToast(`${name}님의 예약이 완료되었습니다.`, `${formatDate(payload.date)} · ${theme.name} · ${normalizeTime(time.startAt)}`);
-        elements.nameInput.value = "";
+        showToast("예약이 완료되었습니다.", `${formatDate(payload.date)} · ${theme.name} · ${normalizeTime(time.startAt)}`);
         state.selectedTimeId = null;
         await loadAvailability();
+        await loadMyReservations();
         elements.formMessage.textContent = "예약이 완료되었습니다.";
         elements.formMessage.className = "message ok";
       } catch (error) {
@@ -596,7 +774,7 @@ const API_BASE = "";
 
       const canEdit = Boolean(
         state.editingReservationId &&
-        elements.editAuthorizationName.value.trim() &&
+        state.currentUser &&
         elements.editReservationDate.value &&
         elements.editReservationTime.value &&
         !elements.editReservationTime.disabled
@@ -690,14 +868,15 @@ const API_BASE = "";
       elements.editReservationForm.hidden = false;
       elements.editReservationTitle.textContent = `예약 수정 #${id}`;
       elements.editReservationMeta.textContent = `${theme?.name || "-"} · ${normalizeTime(time?.startAt || "-")}`;
-      elements.editAuthorizationName.value = "";
+      elements.editAuthorizationName.value = state.currentUser?.nickname || state.currentUser?.loginId || "";
       elements.editReservationDate.value = reservation.date;
       await loadEditAvailability(getReservationTimeId(reservation));
       syncEditReservationForm();
-      elements.editAuthorizationName.focus();
+      elements.editReservationDate.focus();
     }
 
     function renderLookupReservations(reservations) {
+      syncLookupLoginButton();
       state.lookupReservations = reservations;
       elements.lookupList.innerHTML = "";
       elements.lookupCount.textContent = `${reservations.length}건`;
@@ -728,37 +907,50 @@ const API_BASE = "";
         });
     }
 
-    async function lookupReservations(event) {
-      event.preventDefault();
-      const guestName = elements.lookupGuestName.value.trim();
-      if (!guestName) {
-        elements.lookupMessage.textContent = "예약자 이름을 입력해주세요.";
-        elements.lookupMessage.className = "message error";
-        renderLookupReservations([]);
+    async function loadMyReservations() {
+      if (!state.currentUser) {
+        renderLoggedOutLookup();
         clearEditReservation();
         return;
       }
 
-      elements.lookupButton.disabled = true;
       elements.lookupMessage.textContent = "예약을 조회하는 중입니다.";
       elements.lookupMessage.className = "message";
       clearEditReservation();
 
       try {
         const reservations = state.mode === "live"
-          ? (await getJson("/reservations/me", guestNameHeaders(guestName))).reservations || []
-          : state.demoReservations.filter((reservation) => reservation.guestName === guestName);
+          ? (await getJson("/reservations/me")).reservations || []
+          : state.demoReservations.filter((reservation) =>
+              reservation.guestName === (state.currentUser.nickname || state.currentUser.loginId)
+            );
 
         renderLookupReservations(reservations);
         elements.lookupMessage.textContent = reservations.length === 0 ? "조회된 예약이 없습니다." : "예약 조회가 완료되었습니다.";
         elements.lookupMessage.className = `message${reservations.length === 0 ? "" : " ok"}`;
       } catch (error) {
+        if (isAuthorizationError(error)) {
+          clearCurrentUser();
+          updateAuthUi();
+          renderLoggedOutLookup();
+          return;
+        }
         renderLookupReservations([]);
         elements.lookupMessage.textContent = endpointMessageOr(error, "예약 조회에 실패했습니다.");
         elements.lookupMessage.className = "message error";
-      } finally {
-        elements.lookupButton.disabled = false;
       }
+    }
+
+    function renderLoggedOutLookup() {
+      syncLookupLoginButton();
+      elements.lookupCount.textContent = "로그인이 필요합니다.";
+      elements.lookupMessage.textContent = "로그인 후 조회가 가능합니다.";
+      elements.lookupMessage.className = "message";
+      elements.lookupList.innerHTML = "";
+    }
+
+    function syncLookupLoginButton() {
+      elements.lookupLoginButton.hidden = Boolean(state.currentUser);
     }
 
     function replaceReservation(reservations, editedReservation) {
@@ -809,12 +1001,12 @@ const API_BASE = "";
     }
 
     async function cancelReservation(id) {
-      const authorizationName = elements.lookupGuestName.value.trim();
-      if (!authorizationName) {
-        elements.lookupMessage.textContent = "예약자 이름을 입력해주세요.";
+      if (!state.currentUser) {
+        elements.lookupMessage.textContent = "로그인 후 예약을 취소할 수 있습니다.";
         elements.lookupMessage.className = "message error";
         return;
       }
+      const authorizationName = state.currentUser.nickname || state.currentUser.loginId;
 
       elements.lookupMessage.textContent = "예약을 취소하는 중입니다.";
       elements.lookupMessage.className = "message";
@@ -822,7 +1014,7 @@ const API_BASE = "";
 
       try {
         if (state.mode === "live") {
-          await deleteJson(`/reservations/${id}`, guestNameHeaders(authorizationName));
+          await deleteJson(`/reservations/${id}`);
         } else {
           cancelDemoReservation(id, authorizationName);
           state.demoReservations = removeReservation(state.demoReservations, id);
@@ -844,14 +1036,14 @@ const API_BASE = "";
     async function editReservation(event) {
       event.preventDefault();
       const reservationId = state.editingReservationId;
-      const authorizationName = elements.editAuthorizationName.value.trim();
+      const authorizationName = state.currentUser?.nickname || state.currentUser?.loginId || "";
       const payload = {
         date: elements.editReservationDate.value,
         timeId: Number(elements.editReservationTime.value)
       };
 
       if (!reservationId || !authorizationName || !payload.date || !payload.timeId) {
-        setEditReservationMessage("이름, 날짜, 시간을 모두 입력해주세요.", "error");
+        setEditReservationMessage("로그인 후 날짜와 시간을 모두 입력해주세요.", "error");
         syncEditReservationForm();
         return;
       }
@@ -861,7 +1053,7 @@ const API_BASE = "";
 
       try {
         const editedReservation = state.mode === "live"
-          ? await patchJson(`/reservations/${reservationId}`, payload, guestNameHeaders(authorizationName))
+          ? await patchJson(`/reservations/${reservationId}`, payload)
           : editDemoReservation(reservationId, payload, authorizationName);
 
         if (state.mode === "demo") {
@@ -1242,15 +1434,27 @@ const API_BASE = "";
       state.selectedThemeId = state.themes[0]?.id || null;
       state.selectedTimeId = null;
       elements.dateInput.value = DEFAULT_DATE;
+      updateAuthUi();
       renderPopularThemes();
       renderThemes();
       state.availableTimes = getDemoAvailability();
       renderTimes();
       syncSummary();
-      renderLookupReservations([]);
+      if (state.currentUser) {
+        renderLookupReservations([]);
+      } else {
+        renderLoggedOutLookup();
+      }
     }
 
     async function loadInitialData() {
+      restoreCurrentUser();
+      if (isAuthPage()) {
+        state.mode = "live";
+        fillLoginIdFromQuery();
+        return;
+      }
+
       const isFilePreview = window.location.protocol === "file:";
       if (isFilePreview) {
         renderDemoFirst();
@@ -1298,12 +1502,21 @@ const API_BASE = "";
 
         state.selectedThemeId = state.themes[0]?.id || null;
         state.selectedTimeId = null;
+        updateAuthUi();
         renderPopularThemes();
         renderThemes();
         await loadAvailability();
         syncSummary();
-        renderLookupReservations([]);
+        if (state.currentUser) {
+          await loadMyReservations();
+        } else {
+          renderLoggedOutLookup();
+        }
       } catch (error) {
+        if (isAdminPage() && isAuthorizationError(error)) {
+          redirectToLogin();
+          return;
+        }
         state.mode = "demo";
         renderDemoFirst();
         setSourceStatus();
@@ -1315,9 +1528,7 @@ const API_BASE = "";
         state.selectedTimeId = null;
         loadAvailability();
       });
-      elements.nameInput.addEventListener("input", syncSummary);
       elements.reserveButton.addEventListener("click", reserve);
-      elements.lookupForm.addEventListener("submit", lookupReservations);
       elements.lookupList.addEventListener("click", (event) => {
         const editButton = event.target.closest("[data-edit-reservation-id]");
         if (editButton) {
@@ -1335,6 +1546,14 @@ const API_BASE = "";
       elements.editAuthorizationName.addEventListener("input", syncEditReservationForm);
       elements.editReservationDate.addEventListener("change", () => loadEditAvailability());
       elements.editReservationTime.addEventListener("change", syncEditReservationForm);
+    }
+
+    if (isLoginPage()) {
+      elements.loginForm.addEventListener("submit", login);
+    }
+
+    if (isSignupPage()) {
+      elements.signupForm.addEventListener("submit", signUp);
     }
 
     if (isAdminPage()) {
