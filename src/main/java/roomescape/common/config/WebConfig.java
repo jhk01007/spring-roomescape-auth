@@ -11,7 +11,6 @@ import roomescape.auth.interceptor.SessionAuthInterceptor;
 import roomescape.auth.resolver.LoginMemberArgumentResolver;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -23,12 +22,16 @@ public class WebConfig implements WebMvcConfigurer {
     private final JwtAuthInterceptor jwtAuthInterceptor;
     private final RequiredAuthInterceptor requiredAuthInterceptor;
 
-    private static final List<String> UI_WHITE_LIST = List.of(
-            "/", "/index.html", "/admin", "/admin.html", "/login", "/login.html", "/signup", "/signup.html",
-            "/mobile", "/mobile.html", "/favicon.ico", "/css/**", "/js/**");
-    private static final List<String> API_WHITE_LIST = List.of(
-            "/members", "/auth/web/login", "/auth/web/logout", "/auth/mobile/login", "/auth/mobile/logout", "/auth/mobile/refresh", "/themes/**", "/times/**");
-    private static final List<String> WHITE_LIST = Stream.concat(UI_WHITE_LIST.stream(), API_WHITE_LIST.stream()).toList();
+    private static final List<String> AUTH_REQUIRED_PATHS = List.of(
+            "/reservations",
+            "/reservations/**",
+            "/admin/reservations",
+            "/admin/reservations/**",
+            "/admin/themes",
+            "/admin/themes/**",
+            "/admin/times",
+            "/admin/times/**"
+    );
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -39,15 +42,12 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(sessionAuthInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns(WHITE_LIST);
+                .addPathPatterns(AUTH_REQUIRED_PATHS);
 
         registry.addInterceptor(jwtAuthInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns(WHITE_LIST);
+                .addPathPatterns(AUTH_REQUIRED_PATHS);
 
         registry.addInterceptor(requiredAuthInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns(WHITE_LIST);
+                .addPathPatterns(AUTH_REQUIRED_PATHS);
     }
 }

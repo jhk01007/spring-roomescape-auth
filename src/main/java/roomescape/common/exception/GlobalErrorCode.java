@@ -13,7 +13,7 @@ public enum GlobalErrorCode implements ErrorPolicy {
     INTERNAL_SERVER_ERROR("서버 내부에서 문제가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     AUTHORIZATION_ERROR("인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
     SESSION_NOT_FOUND("세션 정보가 존재하지 않습니다.", BAD_REQUEST),
-    TOKEN_NOT_FOUND("토큰이 존재하지 않습니다.", BAD_REQUEST),
+    TOKEN_NOT_FOUND("토큰 정보가 존재하지 않습니다.", BAD_REQUEST),
     EXPIRED_TOKEN("만료된 토큰입니다.", BAD_REQUEST),
     INVALID_TOKEN("유효하지 않는 토큰입니다.", BAD_REQUEST);
 

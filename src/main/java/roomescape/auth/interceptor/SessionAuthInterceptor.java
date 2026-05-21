@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.method.HandlerMethod;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 
@@ -15,10 +14,6 @@ public class SessionAuthInterceptor implements HandlerInterceptor {
     public static final String AUTH_EXCEPTION = "authException";
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if (!(handler instanceof HandlerMethod)) {
-            return true;
-        }
-
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute(LOGIN_MEMBER_ID) == null) {
             request.setAttribute(AUTH_EXCEPTION, new DomainException(GlobalErrorCode.SESSION_NOT_FOUND));
