@@ -32,15 +32,29 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
         String token = getToken(request);
         if (token == null) return true;
 
-        Long memberId = null;
+        Long memberId = getMemberId(request, token);
+        if (memberId == null) return true;
+
+        request.setAttribute(LOGIN_MEMBER_ID, memberId);
+        return true;
+    }
+
+    private Long getMemberId(HttpServletRequest request, String token) {
+        Long memberId;
         try {
+            validateIsAccessToken(token);
             memberId = jwtProvider.getMemberId(token);
         } catch (DomainException e) {
             request.setAttribute(AUTH_EXCEPTION, e);
-            return true;
+            return null;
         }
-        request.setAttribute(LOGIN_MEMBER_ID, memberId);
-        return true;
+        return memberId;
+    }
+
+    private void validateIsAccessToken(String token) {
+        if(!jwtProvider.isAccessToken(token)) {
+            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+        }
     }
 
     private static String getToken(HttpServletRequest request) {
