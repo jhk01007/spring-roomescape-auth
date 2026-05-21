@@ -640,8 +640,8 @@ async function submitSignup(event) {
   }
 }
 
-function logout() {
-  window.MobileAuth.logout();
+async function logout() {
+  await window.MobileAuth.logout();
   state.user = null;
   state.reservations = [];
   clearEditForm();

@@ -19,8 +19,22 @@ window.MobileAuth = (() => {
     );
   }
 
-  function logout() {
+  async function logout() {
+    const refreshToken = window.MobileApi.getRefreshToken();
     window.MobileApi.clearSession();
+    if (!refreshToken) {
+      return;
+    }
+
+    try {
+      await window.MobileApi.post(
+        "/auth/mobile/logout",
+        { refreshToken },
+        { auth: false, skipRefresh: true }
+      );
+    } catch (error) {
+      // 서버 로그아웃 실패 여부와 무관하게 클라이언트 세션은 이미 정리한다.
+    }
   }
 
   return {

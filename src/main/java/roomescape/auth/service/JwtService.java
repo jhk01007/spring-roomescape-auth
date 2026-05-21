@@ -3,7 +3,7 @@ package roomescape.auth.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.infra.JwtProvider;
-import roomescape.auth.infra.RefreshTokenRepository;
+import roomescape.auth.domain.RefreshTokenRepository;
 import roomescape.auth.service.dto.TokenIssueResult;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
@@ -32,6 +32,11 @@ public class JwtService {
         String savedRefreshToken = getRefreshToken(memberId);
         validateRefreshToken(refreshToken, savedRefreshToken);
         return jwtProvider.createAccessToken(memberId);
+    }
+
+    public void logout(String refreshToken) {
+        Long memberId = jwtProvider.getMemberId(refreshToken);
+        refreshTokenRepository.deleteByMemberId(memberId);
     }
 
     private String getRefreshToken(Long memberId) {

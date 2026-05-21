@@ -3,6 +3,7 @@ package roomescape.auth.infra;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
+import roomescape.auth.domain.RefreshTokenRepository;
 
 import java.time.Instant;
 import java.util.Date;
@@ -22,6 +23,11 @@ public class RedisRefreshTokenRepository implements RefreshTokenRepository {
 
     public Optional<String> findByMemberId(Long memberId) {
         return Optional.ofNullable(redisTemplate.opsForValue().get(key(memberId)));
+    }
+
+    @Override
+    public void deleteByMemberId(Long memberId) {
+        redisTemplate.delete(key(memberId));
     }
 
     private static String key(Long memberId) {

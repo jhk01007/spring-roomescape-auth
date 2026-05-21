@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.controller.dto.MemberLoginRequest;
-import roomescape.auth.controller.dto.TokenRefreshRequest;
-import roomescape.auth.controller.dto.TokenRefreshResponse;
-import roomescape.auth.controller.dto.TokenResponse;
+import roomescape.auth.controller.dto.*;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.service.JwtService;
 import roomescape.member.domain.Member;
@@ -30,7 +27,8 @@ public class MobileAuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<Void> logout(@RequestBody @Valid TokenLogoutRequest tokenLogoutRequest) {
+        jwtService.logout(tokenLogoutRequest.refreshToken());
         return ResponseEntity.noContent().build();
     }
 
