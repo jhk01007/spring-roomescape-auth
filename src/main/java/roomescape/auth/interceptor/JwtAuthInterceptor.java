@@ -50,8 +50,7 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             return null;
         }
 
-        String token = header.substring(AUTHORIZATION_PREFIX.length()).trim();
-        return token;
+        return header.substring(AUTHORIZATION_PREFIX.length()).trim();
     }
 
 }

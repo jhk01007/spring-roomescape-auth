@@ -1,6 +1,5 @@
 package roomescape.auth.infra;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,20 +18,31 @@ import java.util.Date;
 public class JwtProvider {
 
     private final SecretKey key;
-    private final long expirationMs;
+    private final long accessTokenExpirationMs;
+    private final long refreshTokenExpirationMs;
+
 
     public JwtProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms}") long expirationMs
+            @Value("${jwt.access-token-expiration-ms}") long accessTokenExpirationMs,
+            @Value("${jwt.refresh-token-expiration-ms}") long refreshTokenExpirationMs
     ) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
-        this.expirationMs = expirationMs;
+        this.accessTokenExpirationMs = accessTokenExpirationMs;
+        this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
-    public String createToken(Long memberId) {
-        Instant now = Instant.now();
-        Instant expiry = now.plusMillis(expirationMs);
+    public String createAccessToken(Long memberId) {
+        return createToken(accessTokenExpirationMs, memberId);
+    }
 
+    public String createRefreshToken(Long memberId) {
+        return createToken(refreshTokenExpirationMs, memberId);
+    }
+
+    private String createToken(long refreshTokenExpirationMs, Long memberId) {
+        Instant now = Instant.now();
+        Instant expiry = now.plusMillis(refreshTokenExpirationMs);
         return Jwts.builder()
                 .subject(String.valueOf(memberId))
                 .issuedAt(Date.from(now))
@@ -55,4 +65,22 @@ public class JwtProvider {
             throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
         }
     }
+
+    public Instant getExpiration(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getExpiration()
+                    .toInstant();
+        } catch (ExpiredJwtException e) {
+            throw new DomainException(GlobalErrorCode.EXPIRED_TOKEN);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+        }
+    }
+
+
 }
