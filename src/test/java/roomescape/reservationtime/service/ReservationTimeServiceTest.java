@@ -143,13 +143,14 @@ class ReservationTimeServiceTest {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_id, date, time_id, theme_id)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO reservation (store_id, guest_id, date, time_id, theme_id)
+                    VALUES (?, ?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setLong(1, guest.getId());
-            preparedStatement.setDate(2, Date.valueOf(date));
-            preparedStatement.setLong(3, time.getId());
-            preparedStatement.setLong(4, theme.getId());
+            preparedStatement.setLong(1, theme.getStore().getId());
+            preparedStatement.setLong(2, guest.getId());
+            preparedStatement.setDate(3, Date.valueOf(date));
+            preparedStatement.setLong(4, time.getId());
+            preparedStatement.setLong(5, theme.getId());
             return preparedStatement;
         }, keyHolder);
 

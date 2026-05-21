@@ -35,7 +35,7 @@ public class ReservationService {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
 
-        Reservation reservation = new Reservation(guest, date, time, theme);
+        Reservation reservation = new Reservation(theme.getStore(), guest, date, time, theme);
 
         reservationValidator.validateCreate(reservation);
 

@@ -20,7 +20,7 @@ CREATE TABLE reservation_time
 (
     id           BIGINT NOT NULL AUTO_INCREMENT,
     start_at     TIME   NOT NULL,
-    store_id    BIGINT       NOT NULL,
+    store_id     BIGINT NOT NULL,
     deleted_at   TIMESTAMP,
     delete_token BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
@@ -43,9 +43,9 @@ CREATE TABLE member
 
 CREATE TABLE store_manager
 (
-    id BIGINT NOT NULL AUTO_INCREMENT,
+    id        BIGINT NOT NULL AUTO_INCREMENT,
     member_id BIGINT NOT NULL,
-    store_id BIGINT NOT NULL,
+    store_id  BIGINT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (store_id) REFERENCES store (id)
@@ -53,17 +53,19 @@ CREATE TABLE store_manager
 
 CREATE TABLE reservation
 (
-    id           BIGINT       NOT NULL AUTO_INCREMENT,
-    guest_id     BIGINT       NOT NULL,
-    date         DATE         NOT NULL,
-    time_id      BIGINT       NOT NULL,
-    theme_id     BIGINT       NOT NULL,
+    id           BIGINT NOT NULL AUTO_INCREMENT,
+    guest_id     BIGINT NOT NULL,
+    date         DATE   NOT NULL,
+    time_id      BIGINT NOT NULL,
+    theme_id     BIGINT NOT NULL,
+    store_id     BIGINT NOT NULL,
     deleted_at   TIMESTAMP,
-    delete_token BIGINT       NOT NULL DEFAULT 0,
+    delete_token BIGINT NOT NULL DEFAULT 0,
 
     PRIMARY KEY (id),
     CONSTRAINT uk_date_time_id_theme_id_delete_token UNIQUE (date, time_id, theme_id, delete_token),
     FOREIGN KEY (guest_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (store_id) REFERENCES store (id)
 );

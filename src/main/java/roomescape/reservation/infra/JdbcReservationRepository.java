@@ -41,6 +41,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     m.password AS member_password,
                     m.nickname AS member_nickname,
                     m.role AS member_role,
+                    r.store_id AS reservation_store_id,
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
@@ -77,6 +78,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     m.password AS member_password,
                     m.nickname AS member_nickname,
                     m.role AS member_role,
+                    r.store_id AS reservation_store_id,
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
@@ -112,6 +114,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     m.password AS member_password,
                     m.nickname AS member_nickname,
                     m.role AS member_role,
+                    r.store_id AS reservation_store_id,
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
@@ -142,15 +145,16 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation (guest_id, date, time_id, theme_id)
-                            VALUES (?, ?, ?, ?)
+                            INSERT INTO reservation (store_id, guest_id, date, time_id, theme_id)
+                            VALUES (?, ?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
-            preparedStatement.setLong(1, reservation.getGuest().getId());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
-            preparedStatement.setLong(3, reservation.getTime().getId());
-            preparedStatement.setLong(4, reservation.getTheme().getId());
+            preparedStatement.setLong(1, reservation.getStore().getId());
+            preparedStatement.setLong(2, reservation.getGuest().getId());
+            preparedStatement.setDate(3, Date.valueOf(reservation.getDate()));
+            preparedStatement.setLong(4, reservation.getTime().getId());
+            preparedStatement.setLong(5, reservation.getTheme().getId());
             return preparedStatement;
         }, keyHolder);
 
@@ -253,6 +257,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return new Reservation(
                 resultSet.getLong("reservation_id"),
+                new Store(resultSet.getLong("reservation_store_id")),
                 guest,
                 resultSet.getDate("date").toLocalDate(),
                 reservationTime,

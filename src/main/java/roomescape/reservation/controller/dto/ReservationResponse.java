@@ -4,11 +4,12 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
-public record ReservationResponse(Long id, String guestName, String date, ReservationTimeResponse time, ThemeResponse theme) {
+public record ReservationResponse(Long id, Long storeId, String guestName, String date, ReservationTimeResponse time, ThemeResponse theme) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
+                reservation.getStore().getId(),
                 reservation.getGuest().getNickname(),
                 reservation.getDate().toString(),
                 ReservationTimeResponse.from(reservation.getTime()),

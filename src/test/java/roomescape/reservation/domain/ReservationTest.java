@@ -41,6 +41,26 @@ class ReservationTest {
     }
 
     @Test
+    @DisplayName("예약 매장이 null이면 도메인 예외가 발생한다.")
+    void create_fail_when_store_is_null() {
+        assertDomainException(
+                () -> new Reservation((Store) null, member("브라운"), LocalDate.of(2023, 8, 5), time, theme),
+                INVALID_RESERVATION_STORE
+        );
+    }
+
+    @Test
+    @DisplayName("예약 시간과 테마의 매장이 다르면 도메인 예외가 발생한다.")
+    void create_fail_when_store_is_mismatch() {
+        ReservationTime otherStoreTime = new ReservationTime(1L, new Store(2L), LocalTime.of(10, 0));
+
+        assertDomainException(
+                () -> new Reservation(store(), member("브라운"), LocalDate.of(2023, 8, 5), otherStoreTime, theme),
+                RESERVATION_STORE_MISMATCH
+        );
+    }
+
+    @Test
     @DisplayName("예약 날짜가 null이면 도메인 예외가 발생한다.")
     void create_fail_when_date_is_null() {
         assertDomainException(
