@@ -35,6 +35,6 @@ public class MobileAuthStrategy implements AuthStrategy {
                 .statusCode(200)
                 .extract()
                 .jsonPath()
-                .getString("token");
+                .getString("accessToken");
     }
 }
