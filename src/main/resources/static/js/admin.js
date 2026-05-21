@@ -181,6 +181,7 @@ function renderAdmin() {
     async function createTheme(event) {
       event.preventDefault();
       const payload = {
+        storeId: 1,
         name: elements.adminThemeName.value.trim(),
         description: elements.adminThemeDescription.value.trim(),
         thumbnail: elements.adminThemeThumbnail.value.trim()
@@ -327,4 +328,3 @@ function renderAdmin() {
         setAdminMessage(endpointMessageOr(error, "예약 삭제에 실패했습니다."), "error");
       }
     }
-

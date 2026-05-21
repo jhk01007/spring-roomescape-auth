@@ -17,6 +17,7 @@ import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.store.domain.Store;
 import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.service.ReservationService;
@@ -53,7 +54,7 @@ class AdminReservationControllerTest {
     public void getReservationList() throws Exception {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
                 new Reservation(1L, member(1L, "브라운"), LocalDate.of(2023, 8, 5), time, theme),
                 new Reservation(2L, member(2L, "포비"), LocalDate.of(2023, 8, 6), time, theme),
@@ -84,7 +85,7 @@ class AdminReservationControllerTest {
     public void getReservationList_withPaging() throws Exception {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
                 new Reservation(3L, member(3L, "조이"), LocalDate.of(2023, 8, 7), time, theme)
         );
@@ -154,6 +155,10 @@ class AdminReservationControllerTest {
 
     private static Member member(Long id, String nickname) {
         return Member.of(id, "login" + id, Password.fromEncoded("password1"), nickname, Role.USER);
+    }
+
+    private static Store store() {
+        return new Store(1L);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package roomescape.theme.domain;
 
 import roomescape.common.exception.DomainException;
+import roomescape.store.domain.Store;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -9,24 +10,27 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 
 public class Theme {
     private final Long id;
+    private final Store store;
     private final String name;
     private final String description;
     private final String thumbnail;
     private final LocalDateTime deletedAt;
 
-    public Theme(String name, String description, String thumbnail) {
-        this(null, name, description, thumbnail);
+    public Theme(Store store, String name, String description, String thumbnail) {
+        this(null, store, name, description, thumbnail);
     }
 
-    public Theme(Long id, String name, String description, String thumbnail) {
-        this(id, name, description, thumbnail, null);
+    public Theme(Long id, Store store, String name, String description, String thumbnail) {
+        this(id, store, name, description, thumbnail, null);
     }
 
-    public Theme(Long id, String name, String description, String thumbnail, LocalDateTime deletedAt) {
+    public Theme(Long id, Store store, String name, String description, String thumbnail, LocalDateTime deletedAt) {
+        validateStore(store);
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);
         this.id = id;
+        this.store = store;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
@@ -39,7 +43,7 @@ public class Theme {
             throw new DomainException(THEME_ALREADY_HAS_ID);
         }
 
-        return new Theme(id, name, description, thumbnail, deletedAt);
+        return new Theme(id, store, name, description, thumbnail, deletedAt);
     }
 
     private void validateId(Long id) {
@@ -51,6 +55,12 @@ public class Theme {
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new DomainException(INVALID_THEME_NAME);
+        }
+    }
+
+    private void validateStore(Store store) {
+        if (store == null || store.getId() == null) {
+            throw new DomainException(INVALID_THEME_STORE);
         }
     }
 
@@ -68,6 +78,10 @@ public class Theme {
 
     public Long getId() {
         return id;
+    }
+
+    public Store getStore() {
+        return store;
     }
 
     public String getName() {

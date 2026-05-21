@@ -55,7 +55,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
         return new ReservationCreateRequest(
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
@@ -87,7 +87,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(startAt);
         Integer reservationTimeId = createReservationTime(timeRequest);
 
-        ThemeCreateRequest themeRequest = new ThemeCreateRequest("테마1", "설명", "섬네일");
+        ThemeCreateRequest themeRequest = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
         Integer themeId = createTheme(themeRequest);
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
@@ -117,7 +117,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(startAt);
         Integer reservationTimeId = createReservationTime(timeRequest);
 
-        ThemeCreateRequest themeRequest = new ThemeCreateRequest("테마1", "설명", "섬네일");
+        ThemeCreateRequest themeRequest = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
         Integer themeId = createTheme(themeRequest);
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
@@ -139,7 +139,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer editedReservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
                 originalDate,
@@ -173,7 +173,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer editedReservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
                 LocalDate.of(2026, 10, 14),
@@ -211,7 +211,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer editedReservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
                 reservationDate,
@@ -243,7 +243,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer editedReservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
                 LocalDate.of(2026, 10, 14),
@@ -275,7 +275,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer editedReservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
         ReservationCreateRequest otherReservation = new ReservationCreateRequest(
                 LocalDate.of(2026, 10, 14),
@@ -310,7 +310,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         Integer themeId = createTheme(
-                new ThemeCreateRequest("테마1", "설명", "섬네일"));
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
                 LocalDate.of(2026, 10, 14),

@@ -12,6 +12,7 @@ import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
@@ -46,6 +47,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
+                    th.store_id AS theme_store_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
@@ -80,6 +82,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
+                    th.store_id AS theme_store_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
@@ -113,6 +116,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
+                    th.store_id AS theme_store_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
@@ -228,6 +232,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         Theme theme = new Theme(
                 resultSet.getLong("theme_id"),
+                new Store(resultSet.getLong("theme_store_id")),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
                 resultSet.getString("theme_thumbnail"),

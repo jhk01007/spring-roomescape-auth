@@ -32,7 +32,7 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("테마 생성 후 목록에서 조회된다.")
     public void scenario1() throws JsonProcessingException {
-        ThemeCreateRequest request = new ThemeCreateRequest("brown", "설명", "섬네일");
+        ThemeCreateRequest request = new ThemeCreateRequest(1L, "brown", "설명", "섬네일");
         Integer themeId = createTheme(request);
 
         given().log().all()
@@ -49,7 +49,7 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("테마 생성 후 삭제하면 목록에서 사라진다.")
     public void scenario2() throws JsonProcessingException {
-        ThemeCreateRequest request = new ThemeCreateRequest("테마1", "설명", "섬네일");
+        ThemeCreateRequest request = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
         Integer themeId = createTheme(request);
 
         given().log().all()
@@ -77,10 +77,10 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
         mutableClock.setFixed(LocalDate.of(2026, 4, 1));
 
-        Integer themeId = createTheme(new ThemeCreateRequest("인기 테마1", "설명", "섬네일"));
-        Integer themeId2 = createTheme(new ThemeCreateRequest("인기 테마2", "설명", "섬네일"));
-        Integer themeId3 = createTheme(new ThemeCreateRequest("인기 테마3", "설명", "섬네일"));
-        Integer outOfRangeThemeId = createTheme(new ThemeCreateRequest("기간 밖 테마", "설명", "섬네일"));
+        Integer themeId = createTheme(new ThemeCreateRequest(1L, "인기 테마1", "설명", "섬네일"));
+        Integer themeId2 = createTheme(new ThemeCreateRequest(1L, "인기 테마2", "설명", "섬네일"));
+        Integer themeId3 = createTheme(new ThemeCreateRequest(1L, "인기 테마3", "설명", "섬네일"));
+        Integer outOfRangeThemeId = createTheme(new ThemeCreateRequest(1L, "기간 밖 테마", "설명", "섬네일"));
 
         List<Integer> reservationTimeIds = new ArrayList<>();
         for (int i = 0; i < 13; i++) {

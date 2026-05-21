@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import roomescape.store.domain.Store;
 import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.controller.dto.ThemeListResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
@@ -44,9 +45,9 @@ class ThemeControllerTest {
     void getThemeList() throws Exception {
         // given
         List<Theme> themes = List.of(
-                new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
-                new Theme(2L, "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
-                new Theme(3L, "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
+                new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
+                new Theme(2L, store(), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
+                new Theme(3L, store(), "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
         );
         given(themeService.findAllThemes()).willReturn(themes);
 
@@ -86,9 +87,9 @@ class ThemeControllerTest {
     public void popularThemes() throws Exception {
         // given
         List<Theme> themes = List.of(
-                new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
-                new Theme(2L, "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
-                new Theme(3L, "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
+                new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
+                new Theme(2L, store(), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
+                new Theme(3L, store(), "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
         );
         given(themeService.findPopularThemes(anyInt(), anyInt()))
                 .willReturn(themes);
@@ -179,4 +180,7 @@ class ThemeControllerTest {
                 .findPopularThemes(anyInt(), anyInt());
     }
 
+    private Store store() {
+        return new Store(1L);
+    }
 }

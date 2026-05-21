@@ -65,7 +65,7 @@ public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
         Integer reservationTimeId = createReservationTime(timeRequest);
         Integer reservationTimeId2 = createReservationTime(timeRequest2);
 
-        ThemeCreateRequest themeRequest = new ThemeCreateRequest("테마1", "설명", "섬네일");
+        ThemeCreateRequest themeRequest = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
         Integer themeId = createTheme(themeRequest);
 
         ReservationCreateRequest reservationRequest = new ReservationCreateRequest(

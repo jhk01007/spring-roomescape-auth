@@ -18,6 +18,7 @@ import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
+import roomescape.store.domain.Store;
 import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
@@ -59,7 +60,7 @@ class ReservationControllerTest {
     public void create_success() throws Exception {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         Member member = member(1L, "브라운");
         Reservation reservation = new Reservation(1L, member, LocalDate.of(2023, 8, 5), time, theme);
 
@@ -170,7 +171,7 @@ class ReservationControllerTest {
         // given
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         String guestName = "브라운";
         Member member = member(1L, guestName);
         Reservation reservation = new Reservation(1L, member, LocalDate.of(2023, 8, 5), time, theme);
@@ -210,7 +211,7 @@ class ReservationControllerTest {
         // given
         Long reservationId = 1L;
         ReservationTime time = new ReservationTime(2L, LocalTime.of(12, 0));
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
 
         LocalDate date = LocalDate.of(2023, 8, 10);
         Member member = member(1L, "브라운");
@@ -326,5 +327,9 @@ class ReservationControllerTest {
 
     private static Member member(Long id, String nickname) {
         return Member.of(id, "login" + id, Password.fromEncoded("password1"), nickname, Role.USER);
+    }
+
+    private static Store store() {
+        return new Store(1L);
     }
 }

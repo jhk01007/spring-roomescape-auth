@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -23,6 +24,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) ->
             new Theme(
                     resultSet.getLong("id"),
+                    new Store(resultSet.getLong("store_id")),
                     resultSet.getString("name"),
                     resultSet.getString("description"),
                     resultSet.getString("thumbnail"),
@@ -45,7 +47,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query("""
-                SELECT id, name, description, thumbnail, deleted_at
+                SELECT id, store_id, name, description, thumbnail, deleted_at
                 FROM theme
                 WHERE deleted_at IS NULL
                 """, themeRowMapper);
@@ -54,7 +56,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT id, name, description, thumbnail, deleted_at
+                        SELECT id, store_id, name, description, thumbnail, deleted_at
                         FROM theme
                         WHERE id = ? AND deleted_at IS NULL
                         """, themeRowMapper, id)
@@ -67,6 +69,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         return jdbcTemplate.query("""
                         SELECT
                             t.id,
+                            t.store_id,
                             t.name,
                             t.description,
                             t.thumbnail,
@@ -77,7 +80,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                         WHERE r.date BETWEEN ? AND ?
                             AND t.deleted_at IS NULL
                             AND r.deleted_at IS NULL
-                        GROUP BY t.id, t.name, t.description, t.thumbnail, t.deleted_at
+                        GROUP BY t.id, t.store_id, t.name, t.description, t.thumbnail, t.deleted_at
                         ORDER BY COUNT(r.id) DESC
                         LIMIT ?
                         """,
@@ -108,14 +111,15 @@ public class JdbcThemeRepository implements ThemeRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO theme (name, description, thumbnail)
-                            VALUES (?, ?, ?)
+                            INSERT INTO theme (store_id, name, description, thumbnail)
+                            VALUES (?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
-            preparedStatement.setString(1, theme.getName());
-            preparedStatement.setString(2, theme.getDescription());
-            preparedStatement.setString(3, theme.getThumbnail());
+            preparedStatement.setLong(1, theme.getStore().getId());
+            preparedStatement.setString(2, theme.getName());
+            preparedStatement.setString(3, theme.getDescription());
+            preparedStatement.setString(4, theme.getThumbnail());
             return preparedStatement;
         }, keyHolder);
     }

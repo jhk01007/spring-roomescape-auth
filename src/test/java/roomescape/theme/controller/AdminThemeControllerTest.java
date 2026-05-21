@@ -11,6 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import roomescape.store.domain.Store;
 import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 import roomescape.theme.controller.dto.ThemeResponse;
@@ -18,6 +19,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -41,12 +43,12 @@ class AdminThemeControllerTest {
     @DisplayName("테마를 생성하는 요청을 하면 생성된 테마 정보가 응답으로 반환된다.")
     public void create_success() throws Exception {
         // given
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = new Theme(1L, new Store(1L), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
 
-        given(themeService.create(anyString(), anyString(), anyString()))
+        given(themeService.create(anyLong(), anyString(), anyString(), anyString()))
                 .willReturn(theme);
 
-        ThemeCreateRequest request = new ThemeCreateRequest("brown", "설명", "섬네일");
+        ThemeCreateRequest request = new ThemeCreateRequest(1L, "brown", "설명", "섬네일");
 
         // when then
         MvcResult result = mockMvc.perform(
@@ -69,7 +71,7 @@ class AdminThemeControllerTest {
                 ThemeResponse::thumbnail
         ).containsExactly(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail());
 
-        then(themeService).should().create(request.name(), request.description(), request.thumbnail());
+        then(themeService).should().create(request.storeId(), request.name(), request.description(), request.thumbnail());
     }
 
     @ParameterizedTest
@@ -81,7 +83,7 @@ class AdminThemeControllerTest {
     @DisplayName("테마를 생성하는 요청을 할 때 특정 요청값이 비어있으면 에러가 발생한다.")
     public void create_fail(String name, String description, String thumbnail) throws Exception {
         // given
-        ThemeCreateRequest request = new ThemeCreateRequest(name, description, thumbnail);
+        ThemeCreateRequest request = new ThemeCreateRequest(1L, name, description, thumbnail);
 
         // when then
         mockMvc.perform(

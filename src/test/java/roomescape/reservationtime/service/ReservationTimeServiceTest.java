@@ -13,6 +13,7 @@ import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.store.domain.Store;
 import roomescape.test_config.clock.TestClockConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.common.exception.DomainException;
@@ -109,20 +110,29 @@ class ReservationTimeServiceTest {
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
+        insertStore();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
+                    INSERT INTO theme (store_id, name, description, thumbnail)
+                    VALUES (?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, thumbnail);
+            preparedStatement.setLong(1, 1L);
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, description);
+            preparedStatement.setString(4, thumbnail);
             return preparedStatement;
         }, keyHolder);
 
-        return new Theme(getGeneratedId(keyHolder), name, description, thumbnail);
+        return new Theme(getGeneratedId(keyHolder), new Store(1L), name, description, thumbnail);
+    }
+
+    private void insertStore() {
+        jdbcTemplate.update("""
+                MERGE INTO store KEY(id)
+                VALUES (1)
+                """);
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {

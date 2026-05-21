@@ -1,11 +1,19 @@
+CREATE TABLE store
+(
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY (id)
+);
+
 CREATE TABLE theme
 (
     id          BIGINT       NOT NULL AUTO_INCREMENT,
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     thumbnail   VARCHAR(255) NOT NULL,
+    store_id    BIGINT       NOT NULL,
     deleted_at  TIMESTAMP,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (store_id) REFERENCES store (id)
 );
 
 CREATE TABLE reservation_time
@@ -29,6 +37,16 @@ CREATE TABLE member
     PRIMARY KEY (id),
     CONSTRAINT uk_member_login_id UNIQUE (login_id),
     CONSTRAINT uk_member_nickname UNIQUE (nickname)
+);
+
+CREATE TABLE store_manager
+(
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    member_id BIGINT NOT NULL,
+    store_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
+    FOREIGN KEY (store_id) REFERENCES store (id)
 );
 
 CREATE TABLE reservation

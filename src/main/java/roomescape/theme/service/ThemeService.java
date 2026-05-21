@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.theme.domain.repository.ThemeRepository;
@@ -22,8 +23,8 @@ public class ThemeService {
     private final Clock clock;
 
     @Transactional
-    public Theme create(String name, String description, String thumbnail) {
-        Theme theme = new Theme(name, description, thumbnail);
+    public Theme create(Long storeId, String name, String description, String thumbnail) {
+        Theme theme = new Theme(new Store(storeId), name, description, thumbnail);
 
         return themeRepository.save(theme);
     }

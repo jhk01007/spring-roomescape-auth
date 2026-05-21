@@ -12,6 +12,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
@@ -28,7 +29,7 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 class ReservationTest {
 
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-    private final Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+    private final Theme theme = new Theme(1L, new Store(1L), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
 
     @Test
     @DisplayName("예약자가 비어있으면 도메인 예외가 발생한다.")

@@ -13,19 +13,22 @@
 -- Theme 11: 기간 밖 예약만 있음
 -- Theme 12: 예약 없음
 
-INSERT INTO theme (id, name, description, thumbnail)
-VALUES (1, 'Theme 1', 'Popular theme rank 1', 'https://example.com/theme-1.png'),
-       (2, 'Theme 2', 'Popular theme rank 2', 'https://example.com/theme-2.png'),
-       (3, 'Theme 3', 'Popular theme rank 3', 'https://example.com/theme-3.png'),
-       (4, 'Theme 4', 'Popular theme rank 4', 'https://example.com/theme-4.png'),
-       (5, 'Theme 5', 'Popular theme rank 5', 'https://example.com/theme-5.png'),
-       (6, 'Theme 6', 'Popular theme rank 6', 'https://example.com/theme-6.png'),
-       (7, 'Theme 7', 'Popular theme rank 7', 'https://example.com/theme-7.png'),
-       (8, 'Theme 8', 'Popular theme rank 8', 'https://example.com/theme-8.png'),
-       (9, 'Theme 9', 'Popular theme rank 9', 'https://example.com/theme-9.png'),
-       (10, 'Theme 10', 'Popular theme rank 10', 'https://example.com/theme-10.png'),
-       (11, 'Theme 11', 'Out of range reservations only', 'https://example.com/theme-11.png'),
-       (12, 'Theme 12', 'No reservations', 'https://example.com/theme-12.png');
+MERGE INTO store KEY(id)
+VALUES (1);
+
+INSERT INTO theme (id, store_id, name, description, thumbnail)
+VALUES (1, 1, 'Theme 1', 'Popular theme rank 1', 'https://example.com/theme-1.png'),
+       (2, 1, 'Theme 2', 'Popular theme rank 2', 'https://example.com/theme-2.png'),
+       (3, 1, 'Theme 3', 'Popular theme rank 3', 'https://example.com/theme-3.png'),
+       (4, 1, 'Theme 4', 'Popular theme rank 4', 'https://example.com/theme-4.png'),
+       (5, 1, 'Theme 5', 'Popular theme rank 5', 'https://example.com/theme-5.png'),
+       (6, 1, 'Theme 6', 'Popular theme rank 6', 'https://example.com/theme-6.png'),
+       (7, 1, 'Theme 7', 'Popular theme rank 7', 'https://example.com/theme-7.png'),
+       (8, 1, 'Theme 8', 'Popular theme rank 8', 'https://example.com/theme-8.png'),
+       (9, 1, 'Theme 9', 'Popular theme rank 9', 'https://example.com/theme-9.png'),
+       (10, 1, 'Theme 10', 'Popular theme rank 10', 'https://example.com/theme-10.png'),
+       (11, 1, 'Theme 11', 'Out of range reservations only', 'https://example.com/theme-11.png'),
+       (12, 1, 'Theme 12', 'No reservations', 'https://example.com/theme-12.png');
 
 INSERT INTO reservation_time (id, start_at)
 VALUES (1, '10:00:00'),
@@ -191,6 +194,8 @@ VALUES (56, 56, '2026-04-28', 1, 11),
 
 ALTER TABLE theme
     ALTER COLUMN id RESTART WITH 13;
+ALTER TABLE store
+    ALTER COLUMN id RESTART WITH 2;
 ALTER TABLE reservation_time
     ALTER COLUMN id RESTART WITH 7;
 ALTER TABLE member

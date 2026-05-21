@@ -1,6 +1,7 @@
 package roomescape.theme.infra;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.vo.Role;
+import roomescape.store.domain.Store;
 import roomescape.test_config.clock.MutableClock;
 import roomescape.test_config.clock.TestClockConfig;
 import roomescape.theme.domain.Theme;
@@ -40,10 +42,15 @@ class JdbcThemeRepositoryTest {
     @Autowired
     private MutableClock clock;
 
+    @BeforeEach
+    void setUp() {
+        insertStore();
+    }
+
     @Test
     @DisplayName("Theme를 저장하고 조회한다.")
     public void saveAndFindById() {
-        Theme theme = jdbcThemeRepository.save(new Theme("kim", "desc1", "thumb1"));
+        Theme theme = jdbcThemeRepository.save(new Theme(store(), "kim", "desc1", "thumb1"));
 
         Optional<Theme> found = jdbcThemeRepository.findById(theme.getId());
 
@@ -71,48 +78,9 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("모든 Theme를 불러온다.")
     public void findAll() {
-        KeyHolder keyHolder2 = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection2 -> {
-            PreparedStatement preparedStatement2 = connection2.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement2.setString(1, "kim");
-            preparedStatement2.setString(2, "desc1");
-            preparedStatement2.setString(3, "thumb1");
-            return preparedStatement2;
-        }, keyHolder2);
-
-        new Theme(getGeneratedId(keyHolder2), "kim", "desc1", "thumb1");
-        KeyHolder keyHolder1 = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection1 -> {
-            PreparedStatement preparedStatement1 = connection1.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement1.setString(1, "lee");
-            preparedStatement1.setString(2, "desc2");
-            preparedStatement1.setString(3, "thumb2");
-            return preparedStatement1;
-        }, keyHolder1);
-
-        new Theme(getGeneratedId(keyHolder1), "lee", "desc2", "thumb2");
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, "park");
-            preparedStatement.setString(2, "desc3");
-            preparedStatement.setString(3, "thumb3");
-            return preparedStatement;
-        }, keyHolder);
-
-        new Theme(getGeneratedId(keyHolder), "park", "desc3", "thumb3");
+        insertTheme("kim", "desc1", "thumb1");
+        insertTheme("lee", "desc2", "thumb2");
+        insertTheme("park", "desc3", "thumb3");
 
         List<Theme> themes = jdbcThemeRepository.findAll();
 
@@ -133,20 +101,7 @@ class JdbcThemeRepositoryTest {
     public void findAll_softDelete() {
         // given
         insertDeletedTheme("kim", "desc1", "thumb1");
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, "lee");
-            preparedStatement.setString(2, "desc2");
-            preparedStatement.setString(3, "thumb2");
-            return preparedStatement;
-        }, keyHolder);
-
-        Theme activeTheme = new Theme(getGeneratedId(keyHolder), "lee", "desc2", "thumb2");
+        Theme activeTheme = insertTheme("lee", "desc2", "thumb2");
 
         // when
         List<Theme> themes = jdbcThemeRepository.findAll();
@@ -160,20 +115,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("Theme 존재 여부를 조회한다.")
     public void existsById() {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, "kim");
-            preparedStatement.setString(2, "desc1");
-            preparedStatement.setString(3, "thumb1");
-            return preparedStatement;
-        }, keyHolder);
-
-        Theme theme = new Theme(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
+        Theme theme = insertTheme("kim", "desc1", "thumb1");
 
         boolean exists = jdbcThemeRepository.existsById(theme.getId());
         boolean notExists = jdbcThemeRepository.existsById(theme.getId() + 1);
@@ -218,34 +160,8 @@ class JdbcThemeRepositoryTest {
     @DisplayName("인기 테마 조회는 삭제된 예약을 집계에서 제외한다.")
     public void findTopThemesByReservationCount_softDelete() {
         // given
-        KeyHolder keyHolder1 = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection1 -> {
-            PreparedStatement preparedStatement1 = connection1.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement1.setString(1, "레벨2 탈출");
-            preparedStatement1.setString(2, "우테코 레벨2를 탈출하는 내용입니다.");
-            preparedStatement1.setString(3, "https://example.com/theme.png");
-            return preparedStatement1;
-        }, keyHolder1);
-
-        Theme activeTheme = new Theme(getGeneratedId(keyHolder1), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, "레벨3 탈출");
-            preparedStatement.setString(2, "우테코 레벨3을 탈출하는 내용입니다.");
-            preparedStatement.setString(3, "https://example.com/theme.png");
-            return preparedStatement;
-        }, keyHolder);
-
-        Theme deletedTheme = new Theme(getGeneratedId(keyHolder), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme activeTheme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme deletedTheme = insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
         Long otherTimeId = insertReservationTime(LocalTime.of(12, 0));
         LocalDate targetDate = LocalDate.of(2026, 5, 1);
@@ -271,20 +187,7 @@ class JdbcThemeRepositoryTest {
     @DisplayName("인기 테마 조회는 삭제된 Theme를 집계에서 제외한다.")
     public void findTopThemesByReservationCount_deletedTheme() {
         // given
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, "레벨2 탈출");
-            preparedStatement.setString(2, "우테코 레벨2를 탈출하는 내용입니다.");
-            preparedStatement.setString(3, "https://example.com/theme.png");
-            return preparedStatement;
-        }, keyHolder);
-
-        Theme activeTheme = new Theme(getGeneratedId(keyHolder), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme activeTheme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Theme deletedTheme = insertDeletedTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
         Long otherTimeId = insertReservationTime(LocalTime.of(12, 0));
@@ -310,20 +213,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("Theme를 삭제한다.")
     public void cancelById() {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, "kim");
-            preparedStatement.setString(2, "desc1");
-            preparedStatement.setString(3, "thumb1");
-            return preparedStatement;
-        }, keyHolder);
-
-        Theme theme = new Theme(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
+        Theme theme = insertTheme("kim", "desc1", "thumb1");
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
         clock.setFixed(now);
 
@@ -354,17 +244,36 @@ class JdbcThemeRepositoryTest {
         LocalDateTime now = LocalDateTime.now(clock);
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail, deleted_at)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO theme (store_id, name, description, thumbnail, deleted_at)
+                    VALUES (?, ?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, thumbnail);
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(now));
+            preparedStatement.setLong(1, store().getId());
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, description);
+            preparedStatement.setString(4, thumbnail);
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(now));
             return preparedStatement;
         }, keyHolder);
 
-        return new Theme(getGeneratedId(keyHolder), name, description, thumbnail);
+        return new Theme(getGeneratedId(keyHolder), store(), name, description, thumbnail);
+    }
+
+    private Theme insertTheme(String name, String description, String thumbnail) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("""
+                    INSERT INTO theme (store_id, name, description, thumbnail)
+                    VALUES (?, ?, ?, ?)
+                    """, new String[]{"id"});
+            preparedStatement.setLong(1, store().getId());
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, description);
+            preparedStatement.setString(4, thumbnail);
+            return preparedStatement;
+        }, keyHolder);
+
+        return new Theme(getGeneratedId(keyHolder), store(), name, description, thumbnail);
     }
 
     private Long insertReservationTime(LocalTime startAt) {
@@ -443,6 +352,17 @@ class JdbcThemeRepositoryTest {
 
     private Long getGeneratedId(KeyHolder keyHolder) {
         return keyHolder.getKey().longValue();
+    }
+
+    private void insertStore() {
+        jdbcTemplate.update("""
+                MERGE INTO store KEY(id)
+                VALUES (1)
+                """);
+    }
+
+    private Store store() {
+        return new Store(1L);
     }
 
 }
