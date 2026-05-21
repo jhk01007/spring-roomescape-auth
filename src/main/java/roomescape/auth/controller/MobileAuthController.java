@@ -35,7 +35,7 @@ public class MobileAuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenRefreshResponse> refresh(@RequestBody TokenRefreshRequest tokenRefreshRequest) {
+    public ResponseEntity<TokenRefreshResponse> refresh(@RequestBody @Valid TokenRefreshRequest tokenRefreshRequest) {
         return ResponseEntity.ok()
                 .body(new TokenRefreshResponse(
                         jwtService.refresh(tokenRefreshRequest.refreshToken())));
