@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.acceptance_test.support.auth.AuthStrategy;
 
 public abstract class AcceptanceTestSupport {
@@ -20,14 +21,25 @@ public abstract class AcceptanceTestSupport {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void setUpAcceptanceTest() throws JsonProcessingException {
         RestAssured.port = port;
+        setUpDefaultStore();
         beforeAuthenticate();
         authStrategy.authenticate("test123", "password1", "test");
     }
 
     protected void beforeAuthenticate() {
+    }
+
+    private void setUpDefaultStore() {
+        jdbcTemplate.update("""
+                MERGE INTO store KEY(id)
+                VALUES (1)
+                """);
     }
 
     @AfterEach

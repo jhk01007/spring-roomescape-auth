@@ -29,6 +29,10 @@ public class Member {
         return new Member(null, new LoginId(loginId), password, new Nickname(nickname), Role.USER);
     }
 
+    public static Member admin(String loginId, Password password, String nickname) {
+        return new Member(null, new LoginId(loginId), password, new Nickname(nickname), Role.ADMIN);
+    }
+
     public static Member of(Long id, String loginId, Password password, String nickname, Role role) {
         return new Member(id, new LoginId(loginId), password, new Nickname(nickname), role);
     }

@@ -8,14 +8,14 @@ import io.restassured.http.ContentType;
 import roomescape.auth.controller.dto.MemberLoginRequest;
 
 import static io.restassured.RestAssured.given;
-import static roomescape.acceptance_test.support.auth.MemberSetup.signUp;
+import static roomescape.acceptance_test.support.auth.MemberSetup.adminSignUp;
 import static roomescape.auth.interceptor.JwtAuthInterceptor.AUTHORIZATION_HEADER;
 import static roomescape.auth.interceptor.JwtAuthInterceptor.AUTHORIZATION_PREFIX;
 
 public class MobileAuthStrategy implements AuthStrategy {
     @Override
     public void authenticate(String loginId, String password, String nickname) throws JsonProcessingException {
-        signUp(loginId, password, "test");
+        adminSignUp(loginId, password, nickname);
         String token = tokenLogin(loginId, password);
 
         RestAssured.requestSpecification = new RequestSpecBuilder()

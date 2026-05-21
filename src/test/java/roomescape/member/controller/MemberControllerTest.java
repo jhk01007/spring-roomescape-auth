@@ -80,6 +80,49 @@ class MemberControllerTest {
                 .signUp(loginId, password, nickname);
     }
 
+    @Test
+    @DisplayName("관리자 회원가입 요청을 한다.")
+    public void createAdminMember_success() throws Exception {
+        // given
+        String loginId = "admin123";
+        String password = "password1";
+        String nickname = "admin";
+        Member mockMember = Member.admin(loginId, Password.fromEncoded(password), nickname).withId(1L);
+
+        given(memberService.signUpAdmin(loginId, password, nickname))
+                .willReturn(mockMember);
+
+        MemberCreateRequest request = new MemberCreateRequest(loginId, password, nickname);
+
+        // when then
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.post("/members/admin")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        MemberCreateResponse response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                MemberCreateResponse.class
+        );
+        Assertions.assertThat(response).extracting(
+                MemberCreateResponse::id,
+                MemberCreateResponse::loginId,
+                MemberCreateResponse::nickname,
+                MemberCreateResponse::role
+        ).containsExactly(
+                mockMember.getId(),
+                mockMember.getLoginId(),
+                mockMember.getNickname(),
+                mockMember.getRole().name());
+
+        then(memberService).should()
+                .signUpAdmin(loginId, password, nickname);
+    }
+
     @ParameterizedTest
     @MethodSource("invalidMemberCreateRequests")
     @DisplayName("회원가입 요청 바디에 필수값이 누락되면 실패한다.")

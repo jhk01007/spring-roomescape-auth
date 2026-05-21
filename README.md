@@ -58,6 +58,34 @@ Content-Type: application/json
 | 아이디가 중복될 때                     | `409` | ✅|
 | 닉네임이 중복될 때                     | `409` | ✅ |
 
+### [✅] 관리자 회원가입 API
+**Request**
+
+```http
+POST /members/admin HTTP/1.1
+Content-Type: application/json
+
+{
+  "loginId": "admin123",
+  "password": "pass1234",
+  "nickname": "관리자"
+}
+```
+
+**Response**
+
+```http
+HTTP/1.1 201
+Content-Type: application/json
+
+{
+  "id": 1,
+  "nickname": "관리자",
+  "loginId": "admin123",
+  "role": "ADMIN"
+}
+```
+
 ### [✅] 웹 로그인 API
 **Request**
 

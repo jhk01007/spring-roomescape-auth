@@ -8,7 +8,7 @@ import io.restassured.http.ContentType;
 import roomescape.auth.controller.dto.MemberLoginRequest;
 
 import static io.restassured.RestAssured.given;
-import static roomescape.acceptance_test.support.auth.MemberSetup.signUp;
+import static roomescape.acceptance_test.support.auth.MemberSetup.adminSignUp;
 
 public class WebAuthStrategy implements AuthStrategy {
     @Override
@@ -16,7 +16,7 @@ public class WebAuthStrategy implements AuthStrategy {
         SessionFilter sessionFilter = new SessionFilter();
         RestAssured.filters(sessionFilter);
 
-        signUp(loginId, password, nickname);
+        adminSignUp(loginId, password, nickname);
         sessionLogin(loginId, password);
     }
 

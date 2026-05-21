@@ -24,4 +24,13 @@ public class MemberController {
                 .body(MemberCreateResponse.from(memberService.signUp(
                         memberCreateRequest.loginId(), memberCreateRequest.password(), memberCreateRequest.nickname())));
     }
+
+    @PostMapping("/admin")
+    public ResponseEntity<MemberCreateResponse> createAdminMember(
+            @RequestBody @Valid MemberCreateRequest memberCreateRequest
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(MemberCreateResponse.from(memberService.signUpAdmin(
+                        memberCreateRequest.loginId(), memberCreateRequest.password(), memberCreateRequest.nickname())));
+    }
 }

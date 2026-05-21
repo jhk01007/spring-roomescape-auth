@@ -54,6 +54,27 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("관리자 회원가입을 하면 Role이 ADMIN인 사용자가 생성된다.")
+    public void signupAdmin_success() {
+        // given
+        String loginId = "admin1";
+        String password = "password1";
+        String nickname = "관리자";
+
+        // when
+        Member member = memberService.signUpAdmin(loginId, password, nickname);
+
+        // then
+        assertThat(member.getId()).isNotNull();
+        assertThat(member).extracting(
+                Member::getLoginId,
+                Member::getNickname,
+                Member::getRole
+        ).containsExactly(loginId, nickname, Role.ADMIN);
+        assertThat(encoder.matches(password, member.getPassword())).isTrue();
+    }
+
+    @Test
     @DisplayName("회원가입을 할 때 아이디가 중복되면 예외가 발생한다.")
     public void signup_fail1() {
         // given
