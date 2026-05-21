@@ -27,21 +27,34 @@ public class JwtService {
         return new TokenIssueResult(accessToken, refreshToken);
     }
 
-    public String refresh(String refreshToken) {
-        Long memberId = jwtProvider.getMemberId(refreshToken);
-        String savedRefreshToken = getRefreshToken(memberId);
-        validateRefreshToken(refreshToken, savedRefreshToken);
-        return jwtProvider.createAccessToken(memberId);
-    }
+    public TokenIssueResult refresh(String reqRefreshToken) {
+        Long memberId = jwtProvider.getMemberId(reqRefreshToken);
+        validateRefreshToken(reqRefreshToken, getRefreshToken(memberId));
 
-    public void logout(String refreshToken) {
-        Long memberId = jwtProvider.getMemberId(refreshToken);
-        refreshTokenRepository.deleteByMemberId(memberId);
+        String newAccessToken = jwtProvider.createAccessToken(memberId);
+        String newRefreshToken = rotateRefreshToken(memberId);
+
+        return new TokenIssueResult(newAccessToken, newRefreshToken);
     }
 
     private String getRefreshToken(Long memberId) {
         return refreshTokenRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new DomainException(GlobalErrorCode.INVALID_TOKEN));
+    }
+
+    private String rotateRefreshToken(Long memberId) {
+        refreshTokenRepository.deleteByMemberId(memberId);
+        String newRefreshToken = jwtProvider.createRefreshToken(memberId);
+        refreshTokenRepository.save(
+                memberId,
+                newRefreshToken,
+                jwtProvider.getExpiration(newRefreshToken));
+        return newRefreshToken;
+    }
+
+    public void logout(String refreshToken) {
+        Long memberId = jwtProvider.getMemberId(refreshToken);
+        refreshTokenRepository.deleteByMemberId(memberId);
     }
 
     private static void validateRefreshToken(String refreshToken, String savedRefreshToken) {
