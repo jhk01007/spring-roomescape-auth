@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Bean;
 public class AuthStrategyConfig {
     @Bean
     public AuthStrategy authStrategy() {
-        return new TokenAuthStrategy();
+        return new MobileAuthStrategy();
     }
 }

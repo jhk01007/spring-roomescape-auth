@@ -10,7 +10,7 @@ import roomescape.auth.controller.dto.LoginRequest;
 import static io.restassured.RestAssured.given;
 import static roomescape.acceptance_test.support.auth.MemberSetup.signUp;
 
-public class SessionAuthStrategy implements AuthStrategy {
+public class WebAuthStrategy implements AuthStrategy {
     @Override
     public void authenticate(String loginId, String password, String nickname) throws JsonProcessingException {
         SessionFilter sessionFilter = new SessionFilter();

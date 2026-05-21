@@ -12,7 +12,7 @@ import static roomescape.acceptance_test.support.auth.MemberSetup.signUp;
 import static roomescape.auth.interceptor.JwtAuthInterceptor.AUTHORIZATION_HEADER;
 import static roomescape.auth.interceptor.JwtAuthInterceptor.AUTHORIZATION_PREFIX;
 
-public class TokenAuthStrategy implements AuthStrategy {
+public class MobileAuthStrategy implements AuthStrategy {
     @Override
     public void authenticate(String loginId, String password, String nickname) throws JsonProcessingException {
         signUp(loginId, password, "test");
