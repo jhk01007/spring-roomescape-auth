@@ -269,6 +269,84 @@
       overflow: hidden;
     }
 
+    .manager-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 16px;
+      box-shadow: 0 12px 24px rgba(43, 35, 24, 0.07);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 320px) auto;
+      gap: 16px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .manager-copy {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .manager-title {
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .manager-message {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .manager-message.error {
+      color: var(--danger);
+      font-weight: 750;
+    }
+
+    .manager-store-card {
+      border: 1px solid rgba(14, 111, 112, 0.26);
+      border-radius: 8px;
+      background: #f7fffc;
+      padding: 12px;
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .manager-store-label {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .manager-store-card strong {
+      font-size: 18px;
+      line-height: 1.2;
+      word-break: keep-all;
+    }
+
+    .manager-store-card span:last-child {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .manager-actions {
+      display: inline-flex;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .manager-actions a {
+      min-width: 112px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
     .reservation-layout {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 360px;

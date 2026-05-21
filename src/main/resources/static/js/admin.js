@@ -10,6 +10,13 @@ function renderAdmin() {
       renderAdminTimes();
     }
 
+    function adminStoreId() {
+      if (typeof currentManagedStoreId !== "function") {
+        return 1;
+      }
+      return currentManagedStoreId() || 1;
+    }
+
     function renderAdminReservationForm() {
       const previousThemeId = Number(elements.adminReserveTheme.value) || state.adminSelectedThemeId;
       elements.adminReserveTheme.innerHTML = "";
@@ -181,7 +188,7 @@ function renderAdmin() {
     async function createTheme(event) {
       event.preventDefault();
       const payload = {
-        storeId: 1,
+        storeId: adminStoreId(),
         name: elements.adminThemeName.value.trim(),
         description: elements.adminThemeDescription.value.trim(),
         thumbnail: elements.adminThemeThumbnail.value.trim()
@@ -219,8 +226,8 @@ function renderAdmin() {
 
       try {
         const time = state.mode === "live"
-          ? await postJson("/admin/times", { storeId: 1, startAt })
-          : { id: getNextId(state.times), startAt };
+          ? await postJson("/admin/times", { storeId: adminStoreId(), startAt })
+          : { id: getNextId(state.times), storeId: adminStoreId(), startAt };
         state.times = [...state.times, time];
         setAdminMessage("예약 시간이 추가되었습니다.", "ok");
         showToast("예약 시간이 추가되었습니다.", normalizeTime(startAt));

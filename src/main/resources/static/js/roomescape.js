@@ -33,7 +33,10 @@ const API_BASE = "";
       adminReservationPage: 1,
       adminReservationSize: 20,
       adminReservationHasNext: false,
-      currentUser: null
+      currentUser: null,
+      managerInfo: null,
+      managerInfoStatus: "idle",
+      managerInfoMessage: ""
     };
 
     const demoThemes = Array.from({ length: 12 }, (_, index) => {
@@ -142,6 +145,13 @@ const API_BASE = "";
       lookupMessage: $("#lookupMessage"),
       lookupList: $("#lookupList"),
       lookupCount: $("#lookupCount"),
+      managerPanel: $("#managerPanel"),
+      managerMessage: $("#managerMessage"),
+      managerStoreCard: $("#managerStoreCard"),
+      managerStoreName: $("#managerStoreName"),
+      managerStoreMeta: $("#managerStoreMeta"),
+      managerLoginButton: $("#managerLoginButton"),
+      managerAdminButton: $("#managerAdminButton"),
       editReservationForm: $("#editReservationForm"),
       editReservationTitle: $("#editReservationTitle"),
       editReservationMeta: $("#editReservationMeta"),
@@ -329,7 +339,14 @@ const API_BASE = "";
 
     function clearCurrentUser() {
       state.currentUser = null;
+      clearManagerInfo();
       window.sessionStorage.removeItem("roomescape.currentUser");
+    }
+
+    function clearManagerInfo() {
+      state.managerInfo = null;
+      state.managerInfoStatus = "idle";
+      state.managerInfoMessage = "";
     }
 
     function endpointMessageOr(error, fallback) {
@@ -373,6 +390,7 @@ const API_BASE = "";
           elements.summaryUser.textContent = loggedIn ? nickname : "비로그인";
           syncSummary();
         }
+        renderManagerInfo();
         return;
       }
 
@@ -382,6 +400,120 @@ const API_BASE = "";
       elements.authStatus.classList.toggle("logged-in", loggedIn);
       elements.summaryUser.textContent = loggedIn ? nickname : "비로그인";
       syncSummary();
+      renderManagerInfo();
+    }
+
+    function managedStore() {
+      return state.managerInfo?.manager ? state.managerInfo.store : null;
+    }
+
+    function currentManagedStoreId() {
+      const storeId = Number(managedStore()?.id);
+      return Number.isFinite(storeId) ? storeId : null;
+    }
+
+    function storeDisplayName(store) {
+      if (!store) {
+        return "-";
+      }
+      return store.name || `매장 #${store.id}`;
+    }
+
+    function renderManagerInfo() {
+      if (!elements.managerPanel) {
+        return;
+      }
+
+      const loggedIn = Boolean(state.currentUser) || isAdminPage();
+      elements.managerLoginButton.hidden = loggedIn;
+      elements.managerAdminButton.hidden = true;
+      elements.managerStoreCard.hidden = true;
+      elements.managerMessage.className = "manager-message";
+
+      if (!loggedIn) {
+        elements.managerMessage.textContent = "로그인 후 매장 매니저 여부를 확인할 수 있습니다.";
+        return;
+      }
+
+      if (state.managerInfoStatus === "loading") {
+        elements.managerMessage.textContent = "관리 중인 매장 정보를 확인하는 중입니다.";
+        return;
+      }
+
+      if (state.managerInfoStatus === "demo") {
+        elements.managerMessage.textContent = "Spring 서버에 연결되면 관리 매장 정보를 확인할 수 있습니다.";
+        return;
+      }
+
+      if (state.managerInfoStatus === "error") {
+        elements.managerMessage.textContent = state.managerInfoMessage || "관리 매장 정보를 불러오지 못했습니다.";
+        elements.managerMessage.classList.add("error");
+        return;
+      }
+
+      const store = managedStore();
+      if (store) {
+        elements.managerMessage.textContent = "이 계정은 아래 매장을 관리하고 있습니다.";
+        elements.managerStoreName.textContent = storeDisplayName(store);
+        elements.managerStoreMeta.textContent = `storeId ${store.id}`;
+        elements.managerStoreCard.hidden = false;
+        elements.managerAdminButton.hidden = isAdminPage();
+        return;
+      }
+
+      if (state.managerInfoStatus === "loaded") {
+        elements.managerMessage.textContent = "현재 계정은 매장 매니저로 등록되어 있지 않습니다.";
+        return;
+      }
+
+      elements.managerMessage.textContent = "로그인 상태를 확인한 뒤 관리 매장 정보를 보여드립니다.";
+    }
+
+    async function loadManagerInfo() {
+      if (!elements.managerPanel) {
+        return;
+      }
+
+      const canRequest = Boolean(state.currentUser) || isAdminPage();
+      if (!canRequest) {
+        clearManagerInfo();
+        renderManagerInfo();
+        return;
+      }
+
+      if (state.mode !== "live") {
+        state.managerInfo = null;
+        state.managerInfoStatus = "demo";
+        state.managerInfoMessage = "";
+        renderManagerInfo();
+        return;
+      }
+
+      state.managerInfoStatus = "loading";
+      state.managerInfoMessage = "";
+      renderManagerInfo();
+
+      try {
+        state.managerInfo = await getJson("/store-managers/me");
+        state.managerInfoStatus = "loaded";
+      } catch (error) {
+        if (isAuthorizationError(error)) {
+          clearCurrentUser();
+          updateAuthUi();
+          if (isUserPage()) {
+            renderLoggedOutLookup();
+            clearEditReservation();
+          }
+          renderManagerInfo();
+          return;
+        }
+
+        state.managerInfo = null;
+        state.managerInfoStatus = "error";
+        state.managerInfoMessage = endpointMessageOr(error, "관리 매장 정보를 불러오지 못했습니다.");
+      }
+
+      renderManagerInfo();
     }
 
     async function signUp(event) {
@@ -428,6 +560,7 @@ const API_BASE = "";
 
       clearCurrentUser();
       updateAuthUi();
+      renderManagerInfo();
 
       if (isUserPage()) {
         renderLoggedOutLookup();
@@ -1121,6 +1254,7 @@ const API_BASE = "";
       state.adminReservationPage = 1;
       state.reservations = pagedDemoReservations();
       setSourceStatus();
+      loadManagerInfo();
 
       if (isAdminPage()) {
         state.adminSelectedThemeId = state.themes[0]?.id || null;
@@ -1150,6 +1284,7 @@ const API_BASE = "";
     async function loadInitialData() {
       restoreCurrentUser();
       updateAuthUi();
+      renderManagerInfo();
       if (isAuthPage()) {
         state.mode = "live";
         fillLoginIdFromQuery();
@@ -1196,6 +1331,7 @@ const API_BASE = "";
         if (isAdminPage()) {
           state.adminSelectedThemeId = state.themes[0]?.id || null;
           state.adminSelectedTimeId = null;
+          await loadManagerInfo();
           await loadAdminAvailability();
           renderAdmin();
           return;
@@ -1206,6 +1342,7 @@ const API_BASE = "";
         updateAuthUi();
         renderPopularThemes();
         renderThemes();
+        await loadManagerInfo();
         await loadAvailability();
         syncSummary();
         if (state.currentUser) {

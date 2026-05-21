@@ -43,6 +43,23 @@
           </div>
         </div>
 
+        <section id="managerPanel" class="manager-panel admin-manager-panel" aria-labelledby="managerTitle">
+          <div class="manager-copy">
+            <p class="section-kicker">내 매장</p>
+            <h2 id="managerTitle" class="manager-title">관리 매장 정보</h2>
+            <p id="managerMessage" class="manager-message">관리 중인 매장 정보를 확인하는 중입니다.</p>
+          </div>
+          <div id="managerStoreCard" class="manager-store-card" hidden>
+            <span class="manager-store-label">관리 매장</span>
+            <strong id="managerStoreName">-</strong>
+            <span id="managerStoreMeta"></span>
+          </div>
+          <div class="manager-actions">
+            <a id="managerLoginButton" class="secondary-button" href="/login" hidden>로그인하기</a>
+            <a id="managerAdminButton" class="primary-button" href="/admin" hidden>관리자 화면</a>
+          </div>
+        </section>
+
         <div class="admin-layout">
           <div class="admin-stack">
             <section class="admin-panel" aria-labelledby="adminReservationFormTitle">

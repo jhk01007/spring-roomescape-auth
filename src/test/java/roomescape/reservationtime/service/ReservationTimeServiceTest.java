@@ -132,8 +132,8 @@ class ReservationTimeServiceTest {
 
     private void insertStore() {
         jdbcTemplate.update("""
-                MERGE INTO store KEY(id)
-                VALUES (1)
+                MERGE INTO store (id, name) KEY(id)
+                VALUES (1, '잠실점')
                 """);
     }
 

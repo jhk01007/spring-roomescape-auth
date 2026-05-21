@@ -1,5 +1,5 @@
-INSERT INTO store (id)
-VALUES (1);
+INSERT INTO store (id, name)
+VALUES (1, '잠실점');
 
 INSERT INTO theme (id, store_id, name, description, thumbnail)
 VALUES (1, 1, 'Theme 1', 'Popular theme rank 1', 'https://example.com/theme-1.png'),

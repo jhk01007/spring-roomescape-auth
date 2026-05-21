@@ -27,6 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
     private static final List<String> AUTH_REQUIRED_PATHS = List.of(
             "/reservations",
             "/reservations/**",
+            "/store-managers",
+            "/store-managers/**",
             "/admin",
             "/admin/**"
     );

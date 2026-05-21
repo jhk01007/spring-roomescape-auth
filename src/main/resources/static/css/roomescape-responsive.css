@@ -5,6 +5,7 @@
       .auth-form,
       .auth-form:nth-child(2),
       .control-strip,
+      .manager-panel,
       .lookup-head,
       .admin-layout,
       .admin-header {
@@ -124,6 +125,7 @@
       .admin-reserve-grid,
       .admin-time-grid,
       .auth-head,
+      .manager-actions,
       .lookup-actions,
       .lookup-form,
       .edit-grid,
@@ -133,6 +135,14 @@
 
       .row-actions {
         width: 100%;
+      }
+
+      .manager-actions {
+        width: 100%;
+      }
+
+      .manager-actions a {
+        flex: 1;
       }
 
       .row-actions > button {

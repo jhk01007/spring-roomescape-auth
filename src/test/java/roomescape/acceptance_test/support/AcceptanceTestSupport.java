@@ -37,8 +37,8 @@ public abstract class AcceptanceTestSupport {
 
     private void setUpDefaultStore() {
         jdbcTemplate.update("""
-                MERGE INTO store KEY(id)
-                VALUES (1)
+                MERGE INTO store (id, name) KEY(id)
+                VALUES (1, '잠실점')
                 """);
     }
 

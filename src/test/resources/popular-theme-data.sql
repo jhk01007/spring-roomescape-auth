@@ -13,8 +13,8 @@
 -- Theme 11: 기간 밖 예약만 있음
 -- Theme 12: 예약 없음
 
-MERGE INTO store KEY(id)
-VALUES (1);
+MERGE INTO store (id, name) KEY(id)
+VALUES (1, '잠실점');
 
 INSERT INTO theme (id, store_id, name, description, thumbnail)
 VALUES (1, 1, 'Theme 1', 'Popular theme rank 1', 'https://example.com/theme-1.png'),
