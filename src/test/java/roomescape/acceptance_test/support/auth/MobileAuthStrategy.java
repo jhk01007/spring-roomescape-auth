@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import roomescape.auth.controller.dto.LoginRequest;
+import roomescape.auth.controller.dto.MemberLoginRequest;
 
 import static io.restassured.RestAssured.given;
 import static roomescape.acceptance_test.support.auth.MemberSetup.signUp;
@@ -28,7 +28,7 @@ public class MobileAuthStrategy implements AuthStrategy {
         ObjectMapper objectMapper = new ObjectMapper();
         return given().log().all()
                 .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(new LoginRequest(loginId, password)))
+                .body(objectMapper.writeValueAsString(new MemberLoginRequest(loginId, password)))
                 .when()
                 .post("/auth/mobile/login")
                 .then().log().all()

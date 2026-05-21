@@ -13,7 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import roomescape.auth.controller.dto.LoginRequest;
+import roomescape.auth.controller.dto.MemberLoginRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Password;
@@ -47,7 +47,7 @@ class WebAuthControllerTest {
         // given
         String loginId = "jaehee123";
         String password = "password1";
-        LoginRequest request = new LoginRequest(loginId, password);
+        MemberLoginRequest request = new MemberLoginRequest(loginId, password);
         Member mockMember = Member.of(1L, loginId, Password.fromEncoded(password), "jaehee", Role.USER);
 
         given(authService.login(loginId, password))
@@ -76,7 +76,7 @@ class WebAuthControllerTest {
     @ParameterizedTest
     @MethodSource("invalidLoginRequests")
     @DisplayName("로그인 요청 바디에 필수값이 누락되면 실패한다.")
-    public void login_fail1(LoginRequest request) throws Exception {
+    public void login_fail1(MemberLoginRequest request) throws Exception {
         // when then
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/auth/web/login")
@@ -87,10 +87,10 @@ class WebAuthControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private static Stream<LoginRequest> invalidLoginRequests() {
+    private static Stream<MemberLoginRequest> invalidLoginRequests() {
         return Stream.of(
-                new LoginRequest(null, "password1"),
-                new LoginRequest("jaehee123", null)
+                new MemberLoginRequest(null, "password1"),
+                new MemberLoginRequest("jaehee123", null)
         );
     }
 
