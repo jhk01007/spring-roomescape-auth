@@ -29,11 +29,19 @@ public class JwtService {
 
     public String refresh(String refreshToken) {
         Long memberId = jwtProvider.getMemberId(refreshToken);
-        String savedRefreshToken = refreshTokenRepository.findByMemberId(memberId)
+        String savedRefreshToken = getRefreshToken(memberId);
+        validateRefreshToken(refreshToken, savedRefreshToken);
+        return jwtProvider.createAccessToken(memberId);
+    }
+
+    private String getRefreshToken(Long memberId) {
+        return refreshTokenRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new DomainException(GlobalErrorCode.INVALID_TOKEN));
+    }
+
+    private static void validateRefreshToken(String refreshToken, String savedRefreshToken) {
         if(!refreshToken.equals(savedRefreshToken)) {
             throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
         }
-        return jwtProvider.createAccessToken(memberId);
     }
 }

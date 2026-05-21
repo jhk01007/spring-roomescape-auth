@@ -178,7 +178,7 @@ function renderAuthMode(mode) {
 
 function renderShell() {
   state.user = window.MobileApi.getUser();
-  const loggedIn = Boolean(window.MobileApi.getToken() && state.user);
+  const loggedIn = Boolean(window.MobileApi.getAccessToken() && state.user);
   elements.authScreen.hidden = loggedIn;
   elements.appScreen.hidden = !loggedIn;
   elements.logoutButton.hidden = !loggedIn;
@@ -686,9 +686,17 @@ async function initialize() {
   elements.dateInput.value = todayDate();
   bindEvents();
   renderAuthMode("login");
+
+  try {
+    await window.MobileApi.ensureAccessToken();
+  } catch (error) {
+    window.MobileAuth.logout();
+    setMessage(elements.authMessage, endpointMessageOr(error, "다시 로그인해주세요."), "error");
+  }
+
   renderShell();
 
-  if (window.MobileApi.getToken()) {
+  if (window.MobileApi.getAccessToken()) {
     await loadAppData();
     activateView("reserve");
   }

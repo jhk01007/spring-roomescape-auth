@@ -5,7 +5,7 @@ window.MobileAuth = (() => {
       { loginId, password },
       { auth: false }
     );
-    window.MobileApi.saveSession(response.token, {
+    window.MobileApi.saveSession(response, {
       loginId,
       nickname: loginId
     });

@@ -61,7 +61,7 @@ public class JwtProvider {
                     .getSubject());
         } catch (ExpiredJwtException e) {
             throw new DomainException(GlobalErrorCode.EXPIRED_TOKEN);
-        } catch (IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
         }
     }
