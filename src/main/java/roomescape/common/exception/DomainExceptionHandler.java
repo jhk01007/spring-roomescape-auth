@@ -5,7 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static roomescape.common.exception.GlobalErrorCode.INTERNAL_SERVER_ERROR;
+import static roomescape.auth.exception.AuthErrorCode.INTERNAL_SERVER_ERROR;
+
 
 @RestControllerAdvice
 public class DomainExceptionHandler {

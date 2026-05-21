@@ -5,7 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.common.exception.DomainException;
-import roomescape.common.exception.GlobalErrorCode;
+
+import static roomescape.auth.exception.AuthErrorCode.AUTHENTICATION_ERROR;
 
 @Component
 public class RequiredAuthInterceptor implements HandlerInterceptor {
@@ -23,6 +24,6 @@ public class RequiredAuthInterceptor implements HandlerInterceptor {
             throw authException;
         }
 
-        throw new DomainException(GlobalErrorCode.AUTHORIZATION_ERROR);
+        throw new DomainException(AUTHENTICATION_ERROR);
     }
 }

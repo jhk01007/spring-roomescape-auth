@@ -9,6 +9,9 @@ import roomescape.auth.infra.JwtProvider;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 
+import static roomescape.auth.exception.AuthErrorCode.INVALID_TOKEN;
+import static roomescape.auth.exception.AuthErrorCode.TOKEN_NOT_FOUND;
+
 
 @Component
 @RequiredArgsConstructor
@@ -48,14 +51,14 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
     private void validateIsAccessToken(String token) {
         if(!jwtProvider.isAccessToken(token)) {
-            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+            throw new DomainException(INVALID_TOKEN);
         }
     }
 
     private static String getToken(HttpServletRequest request) {
         String header = request.getHeader(AUTHORIZATION_HEADER);
         if (header == null || !header.startsWith(AUTHORIZATION_PREFIX)) {
-            request.setAttribute(AUTH_EXCEPTION, new DomainException(GlobalErrorCode.TOKEN_NOT_FOUND));
+            request.setAttribute(AUTH_EXCEPTION, new DomainException(TOKEN_NOT_FOUND));
             return null;
         }
 

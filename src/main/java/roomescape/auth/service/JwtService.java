@@ -9,6 +9,8 @@ import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 import roomescape.member.domain.Member;
 
+import static roomescape.auth.exception.AuthErrorCode.INVALID_TOKEN;
+
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -39,7 +41,7 @@ public class JwtService {
 
     private String getRefreshToken(Long memberId) {
         return refreshTokenRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new DomainException(GlobalErrorCode.INVALID_TOKEN));
+                .orElseThrow(() -> new DomainException(INVALID_TOKEN));
     }
 
     private String rotateRefreshToken(Long memberId) {
@@ -59,7 +61,7 @@ public class JwtService {
 
     private static void validateRefreshToken(String refreshToken, String savedRefreshToken) {
         if(!refreshToken.equals(savedRefreshToken)) {
-            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+            throw new DomainException(INVALID_TOKEN);
         }
     }
 }

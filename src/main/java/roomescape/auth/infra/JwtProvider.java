@@ -7,12 +7,16 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.auth.exception.AuthErrorCode;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+
+import static roomescape.auth.exception.AuthErrorCode.*;
+import static roomescape.auth.exception.AuthErrorCode.INVALID_TOKEN;
 
 @Component
 public class JwtProvider {
@@ -56,7 +60,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public Long getMemberId(String token) {
+    public Long getMemberId(String token) throws DomainException {
         try {
             return Long.valueOf(Jwts.parser()
                     .verifyWith(key)
@@ -65,9 +69,9 @@ public class JwtProvider {
                     .getPayload()
                     .getSubject());
         } catch (ExpiredJwtException e) {
-            throw new DomainException(GlobalErrorCode.EXPIRED_TOKEN);
+            throw new DomainException(EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+            throw new DomainException(INVALID_TOKEN);
         }
     }
 
@@ -81,9 +85,9 @@ public class JwtProvider {
                     .getExpiration()
                     .toInstant();
         } catch (ExpiredJwtException e) {
-            throw new DomainException(GlobalErrorCode.EXPIRED_TOKEN);
+            throw new DomainException(EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+            throw new DomainException(INVALID_TOKEN);
         }
     }
 
@@ -96,9 +100,9 @@ public class JwtProvider {
                     .getPayload()
                     .get(TOKEN_TYPE));
         } catch (ExpiredJwtException e) {
-            throw new DomainException(GlobalErrorCode.EXPIRED_TOKEN);
+            throw new DomainException(EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new DomainException(GlobalErrorCode.INVALID_TOKEN);
+            throw new DomainException(INVALID_TOKEN);
         }
     }
 

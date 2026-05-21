@@ -8,6 +8,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.GlobalErrorCode;
 
+import static roomescape.auth.exception.AuthErrorCode.SESSION_NOT_FOUND;
+
 @Component
 public class SessionAuthInterceptor implements HandlerInterceptor {
     public static final String LOGIN_MEMBER_ID = "loginMemberId";
@@ -16,7 +18,7 @@ public class SessionAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute(LOGIN_MEMBER_ID) == null) {
-            request.setAttribute(AUTH_EXCEPTION, new DomainException(GlobalErrorCode.SESSION_NOT_FOUND));
+            request.setAttribute(AUTH_EXCEPTION, new DomainException(SESSION_NOT_FOUND));
             return true;
         }
         request.setAttribute(LOGIN_MEMBER_ID, session.getAttribute(LOGIN_MEMBER_ID));

@@ -9,10 +9,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.common.exception.DomainException;
-import roomescape.common.exception.GlobalErrorCode;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 
+import static roomescape.auth.exception.AuthErrorCode.AUTHENTICATION_ERROR;
 import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
 
 
@@ -38,10 +38,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private Member getMember(Long memberId) {
         if(memberId == null) {
-            throw new DomainException(GlobalErrorCode.AUTHORIZATION_ERROR);
+            throw new DomainException(AUTHENTICATION_ERROR);
         }
 
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new DomainException(GlobalErrorCode.AUTHORIZATION_ERROR));
+                .orElseThrow(() -> new DomainException(AUTHENTICATION_ERROR));
     }
 }
