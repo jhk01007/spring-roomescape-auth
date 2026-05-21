@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.controller.dto.MemberLoginRequest;
+import roomescape.auth.domain.LoginMemberInfo;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
 
-import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
+import static roomescape.auth.domain.LoginMemberInfo.LOGIN_MEMBER_INFO;
 
 
 @RestController
@@ -25,7 +26,7 @@ public class WebAuthController {
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody @Valid MemberLoginRequest memberLoginRequest, HttpSession httpSession) {
         Member member = authService.login(memberLoginRequest.loginId(), memberLoginRequest.password());
-        httpSession.setAttribute(LOGIN_MEMBER_ID, member.getId());
+        httpSession.setAttribute(LOGIN_MEMBER_INFO, LoginMemberInfo.from(member));
         return ResponseEntity.noContent().build();
     }
 

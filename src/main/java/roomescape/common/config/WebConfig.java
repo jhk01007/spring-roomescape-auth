@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import roomescape.auth.interceptor.AdminAuthorizeInterceptor;
 import roomescape.auth.interceptor.JwtAuthInterceptor;
 import roomescape.auth.interceptor.RequiredAuthInterceptor;
 import roomescape.auth.interceptor.SessionAuthInterceptor;
@@ -21,16 +22,13 @@ public class WebConfig implements WebMvcConfigurer {
     private final SessionAuthInterceptor sessionAuthInterceptor;
     private final JwtAuthInterceptor jwtAuthInterceptor;
     private final RequiredAuthInterceptor requiredAuthInterceptor;
+    private final AdminAuthorizeInterceptor adminAuthorizeInterceptor;
 
     private static final List<String> AUTH_REQUIRED_PATHS = List.of(
             "/reservations",
             "/reservations/**",
-            "/admin/reservations",
-            "/admin/reservations/**",
-            "/admin/themes",
-            "/admin/themes/**",
-            "/admin/times",
-            "/admin/times/**"
+            "/admin",
+            "/admin/**"
     );
 
     @Override
@@ -49,5 +47,8 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(requiredAuthInterceptor)
                 .addPathPatterns(AUTH_REQUIRED_PATHS);
+
+        registry.addInterceptor(adminAuthorizeInterceptor)
+                .addPathPatterns("/admin", "/admin/**");
     }
 }

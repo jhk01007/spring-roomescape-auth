@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.auth.controller.dto.MemberLoginRequest;
+import roomescape.auth.domain.LoginMemberInfo;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Password;
@@ -27,7 +28,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
+import static roomescape.auth.domain.LoginMemberInfo.LOGIN_MEMBER_INFO;
 
 @ControllerTest(WebAuthController.class)
 class WebAuthControllerTest {
@@ -67,7 +68,8 @@ class WebAuthControllerTest {
         HttpSession session = result.getRequest().getSession(false);
 
         assertThat(session).isNotNull();
-        assertThat(session.getAttribute(LOGIN_MEMBER_ID)).isEqualTo(mockMember.getId());
+        assertThat(session.getAttribute(LOGIN_MEMBER_INFO))
+                .isEqualTo(new LoginMemberInfo(mockMember.getId(), mockMember.getRole()));
 
         then(authService).should()
                 .login(loginId, password);
@@ -99,7 +101,7 @@ class WebAuthControllerTest {
     public void logout_success() throws Exception {
         // given
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute(LOGIN_MEMBER_ID, 1L);
+        session.setAttribute(LOGIN_MEMBER_INFO, new LoginMemberInfo(1L, Role.USER));
 
         // when
         mockMvc.perform(

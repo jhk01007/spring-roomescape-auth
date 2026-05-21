@@ -5,10 +5,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.auth.domain.LoginMemberInfo;
 import roomescape.auth.infra.JwtProvider;
 import roomescape.common.exception.DomainException;
-import roomescape.common.exception.GlobalErrorCode;
+import roomescape.member.domain.vo.Role;
 
+import static roomescape.auth.domain.LoginMemberInfo.LOGIN_MEMBER_INFO;
 import static roomescape.auth.exception.AuthErrorCode.INVALID_TOKEN;
 import static roomescape.auth.exception.AuthErrorCode.TOKEN_NOT_FOUND;
 
@@ -17,7 +19,6 @@ import static roomescape.auth.exception.AuthErrorCode.TOKEN_NOT_FOUND;
 @RequiredArgsConstructor
 public class JwtAuthInterceptor implements HandlerInterceptor {
 
-    public static final String LOGIN_MEMBER_ID = "loginMemberId";
     public static final String AUTH_EXCEPTION = "authException";
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -30,23 +31,23 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
         String token = getToken(request);
         if (token == null) return true;
 
-        Long memberId = getMemberId(request, token);
-        if (memberId == null) return true;
+        LoginMemberInfo loginMemberInfo = getLoginMemberInfo(request, token);
+        if (loginMemberInfo == null) return true;
 
-        request.setAttribute(LOGIN_MEMBER_ID, memberId);
+        request.setAttribute(LOGIN_MEMBER_INFO, loginMemberInfo);
         return true;
     }
 
-    private Long getMemberId(HttpServletRequest request, String token) {
-        Long memberId;
+    private LoginMemberInfo getLoginMemberInfo(HttpServletRequest request, String token) {
         try {
             validateIsAccessToken(token);
-            memberId = jwtProvider.getMemberId(token);
+            Long memberId = jwtProvider.getMemberId(token);
+            Role role = jwtProvider.getRole(token);
+            return new LoginMemberInfo(memberId, role);
         } catch (DomainException e) {
             request.setAttribute(AUTH_EXCEPTION, e);
             return null;
         }
-        return memberId;
     }
 
     private void validateIsAccessToken(String token) {

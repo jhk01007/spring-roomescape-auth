@@ -9,11 +9,12 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.common.exception.DomainException;
+import roomescape.auth.domain.LoginMemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 
+import static roomescape.auth.domain.LoginMemberInfo.LOGIN_MEMBER_INFO;
 import static roomescape.auth.exception.AuthErrorCode.AUTHENTICATION_ERROR;
-import static roomescape.auth.interceptor.SessionAuthInterceptor.LOGIN_MEMBER_ID;
 
 
 @RequiredArgsConstructor
@@ -32,16 +33,16 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(
             MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        Long memberId = (Long) request.getAttribute(LOGIN_MEMBER_ID);
-        return getMember(memberId);
+        LoginMemberInfo loginMemberInfo = (LoginMemberInfo) request.getAttribute(LOGIN_MEMBER_INFO);
+        return getMember(loginMemberInfo);
     }
 
-    private Member getMember(Long memberId) {
-        if(memberId == null) {
+    private Member getMember(LoginMemberInfo loginMemberInfo) {
+        if(loginMemberInfo == null) {
             throw new DomainException(AUTHENTICATION_ERROR);
         }
 
-        return memberRepository.findById(memberId)
+        return memberRepository.findById(loginMemberInfo.id())
                 .orElseThrow(() -> new DomainException(AUTHENTICATION_ERROR));
     }
 }

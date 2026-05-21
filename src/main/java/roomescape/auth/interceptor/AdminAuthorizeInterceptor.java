@@ -4,26 +4,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.auth.domain.LoginMemberInfo;
 import roomescape.common.exception.DomainException;
 
 import static roomescape.auth.domain.LoginMemberInfo.LOGIN_MEMBER_INFO;
 import static roomescape.auth.exception.AuthErrorCode.AUTHENTICATION_ERROR;
+import static roomescape.auth.exception.AuthErrorCode.AUTHORIZATION_ERROR;
 
 @Component
-public class RequiredAuthInterceptor implements HandlerInterceptor {
-    public static final String AUTH_EXCEPTION = "authException";
+public class AdminAuthorizeInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (request.getAttribute(LOGIN_MEMBER_INFO) != null) {
-            return true;
+        LoginMemberInfo loginMemberInfo = (LoginMemberInfo) request.getAttribute(LOGIN_MEMBER_INFO);
+        if (loginMemberInfo == null) {
+            throw new DomainException(AUTHENTICATION_ERROR);
         }
 
-        DomainException authException = (DomainException) request.getAttribute(AUTH_EXCEPTION);
-        if (authException != null) {
-            throw authException;
+        if (!loginMemberInfo.isAdmin()) {
+            throw new DomainException(AUTHORIZATION_ERROR);
         }
-
-        throw new DomainException(AUTHENTICATION_ERROR);
+        return true;
     }
 }

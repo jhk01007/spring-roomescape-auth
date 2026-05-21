@@ -8,6 +8,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public enum AuthErrorCode implements ErrorPolicy {
     INTERNAL_SERVER_ERROR("서버 내부에서 문제가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     AUTHENTICATION_ERROR("인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
+    AUTHORIZATION_ERROR("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
     SESSION_NOT_FOUND("세션 정보가 존재하지 않습니다.", BAD_REQUEST),
     TOKEN_NOT_FOUND("토큰 정보가 존재하지 않습니다.", BAD_REQUEST),
     EXPIRED_TOKEN("만료된 토큰입니다.", BAD_REQUEST),
@@ -24,16 +25,16 @@ public enum AuthErrorCode implements ErrorPolicy {
     }
     @Override
     public String code() {
-        return "";
+        return code;
     }
 
     @Override
     public String message() {
-        return "";
+        return message;
     }
 
     @Override
     public HttpStatus status() {
-        return null;
+        return status;
     }
 }
