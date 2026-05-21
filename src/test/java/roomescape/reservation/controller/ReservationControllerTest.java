@@ -59,7 +59,7 @@ class ReservationControllerTest {
     @DisplayName("예약을 생성하는 요청을 하면 생성된 예약 정보가 응답으로 반환된다.")
     public void create_success() throws Exception {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
         Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         Member member = member(1L, "브라운");
         Reservation reservation = new Reservation(1L, member, LocalDate.of(2023, 8, 5), time, theme);
@@ -107,8 +107,9 @@ class ReservationControllerTest {
     private static void assertTime(ReservationResponse reservationResponse, ReservationTime time) {
         assertThat(reservationResponse.time()).extracting(
                 ReservationTimeResponse::id,
+                ReservationTimeResponse::storeId,
                 ReservationTimeResponse::startAt
-        ).containsExactly(time.getId(), time.getStartAt().toString());
+        ).containsExactly(time.getId(), time.getStore().getId(), time.getStartAt().toString());
     }
 
     private static void assertTheme(ReservationResponse reservationResponse, Theme theme) {
@@ -170,7 +171,7 @@ class ReservationControllerTest {
     public void getListByGuestName_success() throws Exception {
         // given
 
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
         Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         String guestName = "브라운";
         Member member = member(1L, guestName);
@@ -210,7 +211,7 @@ class ReservationControllerTest {
     public void editDateTime_success() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationTime time = new ReservationTime(2L, LocalTime.of(12, 0));
+        ReservationTime time = new ReservationTime(2L, store(), LocalTime.of(12, 0));
         Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
 
         LocalDate date = LocalDate.of(2023, 8, 10);

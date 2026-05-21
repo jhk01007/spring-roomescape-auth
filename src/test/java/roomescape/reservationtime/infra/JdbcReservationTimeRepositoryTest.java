@@ -49,13 +49,15 @@ class JdbcReservationTimeRepositoryTest {
     void save() {
 
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
+        insertStore();
+        ReservationTime reservationTime = new ReservationTime(new Store(1L), LocalTime.of(10, 0));
 
         // given
         ReservationTime saved = reservationTimeRepository.save(reservationTime);
 
         // then
         assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getStore()).isEqualTo(new Store(1L));
         assertThat(saved.getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
@@ -103,19 +105,19 @@ class JdbcReservationTimeRepositoryTest {
     void 예약_시간_존재_여부를_조회한다() {
         insertReservationTime(LocalTime.of(10, 0));
 
-        boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
+        boolean exists = reservationTimeRepository.existsByStoreIdAndStartAt(1L, LocalTime.of(10, 0));
 
         assertThat(exists).isTrue();
     }
 
     @Test
     @DisplayName("삭제된 예약 시간은 존재하지 않는 것으로 조회한다.")
-    public void existsByStartAt_softDelete() {
+    public void existsByStoreIdAndStartAt_softDelete() {
         // given
         insertDeletedReservationTime(LocalTime.of(10, 0));
 
         // when
-        boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
+        boolean exists = reservationTimeRepository.existsByStoreIdAndStartAt(1L, LocalTime.of(10, 0));
 
         // then
         assertThat(exists).isFalse();
@@ -219,34 +221,38 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
+        insertStore();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at)
-                    VALUES (?)
+                    INSERT INTO reservation_time (store_id, start_at)
+                    VALUES (?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
+            preparedStatement.setLong(1, 1L);
+            preparedStatement.setString(2, startAt.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), startAt);
+        return new ReservationTime(getGeneratedId(keyHolder), new Store(1L), startAt);
     }
 
     private ReservationTime insertDeletedReservationTime(LocalTime startAt) {
+        insertStore();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at, deleted_at)
-                    VALUES (?, ?)
+                    INSERT INTO reservation_time (store_id, start_at, deleted_at)
+                    VALUES (?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now(clock)));
+            preparedStatement.setLong(1, 1L);
+            preparedStatement.setString(2, startAt.toString());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now(clock)));
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), startAt);
+        return new ReservationTime(getGeneratedId(keyHolder), new Store(1L), startAt);
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {

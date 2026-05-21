@@ -15,13 +15,13 @@ VALUES (1, 1, 'Theme 1', 'Popular theme rank 1', 'https://example.com/theme-1.pn
        (11, 1, 'Theme 11', 'Out of range reservations only', 'https://example.com/theme-11.png'),
        (12, 1, 'Theme 12', 'No reservations', 'https://example.com/theme-12.png');
 
-INSERT INTO reservation_time (id, start_at)
-VALUES (1, '10:00:00'),
-       (2, '12:00:00'),
-       (3, '14:00:00'),
-       (4, '16:00:00'),
-       (5, '18:00:00'),
-       (6, '20:00:00');
+INSERT INTO reservation_time (id, store_id, start_at)
+VALUES (1, 1, '10:00:00'),
+       (2, 1, '12:00:00'),
+       (3, 1, '14:00:00'),
+       (4, 1, '16:00:00'),
+       (5, 1, '18:00:00'),
+       (6, 1, '20:00:00');
 
 INSERT INTO member (id, nickname, login_id, password, role)
 VALUES (1, 'guest_1', 'guest1', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'USER'),

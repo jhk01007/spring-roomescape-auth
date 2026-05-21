@@ -14,6 +14,7 @@ import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infra.dto.ReservationTimeAvailability;
 import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.store.domain.Store;
 import roomescape.test_config.web.ControllerTest;
 
 import java.time.LocalDate;
@@ -45,9 +46,9 @@ class ReservationTimeControllerTest {
     public void getReservationTimeList() throws Exception {
         // given
         List<ReservationTime> times = List.of(
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new ReservationTime(2L, LocalTime.of(12, 0)),
-                new ReservationTime(3L, LocalTime.of(14, 0))
+                new ReservationTime(1L, store(), LocalTime.of(10, 0)),
+                new ReservationTime(2L, store(), LocalTime.of(12, 0)),
+                new ReservationTime(3L, store(), LocalTime.of(14, 0))
         );
         given(reservationTimeService.findAllReservationTimes()).willReturn(times);
 
@@ -73,12 +74,13 @@ class ReservationTimeControllerTest {
         assertThat(response.times()).hasSize(3)
                 .extracting(
                         ReservationTimeResponse::id,
+                        ReservationTimeResponse::storeId,
                         ReservationTimeResponse::startAt
                 )
                 .containsExactly(
-                        tuple(1L, "10:00"),
-                        tuple(2L, "12:00"),
-                        tuple(3L, "14:00")
+                        tuple(1L, 1L, "10:00"),
+                        tuple(2L, 1L, "12:00"),
+                        tuple(3L, 1L, "14:00")
                 );
     }
 
@@ -88,8 +90,8 @@ class ReservationTimeControllerTest {
         // given
         LocalDate date = LocalDate.of(2023, 8, 5);
         Long themeId = 1L;
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(2L, LocalTime.of(12, 0));
+        ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
+        ReservationTime time2 = new ReservationTime(2L, store(), LocalTime.of(12, 0));
         List<ReservationTimeAvailability> timeAvailabilities = List.of(
                 ReservationTimeAvailability.available(time),
                 ReservationTimeAvailability.unavailable(time2)
@@ -112,12 +114,13 @@ class ReservationTimeControllerTest {
         assertThat(response.availableTimes())
                 .extracting(
                         AvailableTimeResponse::id,
+                        AvailableTimeResponse::storeId,
                         AvailableTimeResponse::startAt,
                         AvailableTimeResponse::isAvailable
                 )
                 .containsExactly(
-                        tuple(1L, LocalTime.of(10, 0), true),
-                        tuple(2L, LocalTime.of(12, 0), false)
+                        tuple(1L, 1L, LocalTime.of(10, 0), true),
+                        tuple(2L, 1L, LocalTime.of(12, 0), false)
                 );
 
         then(reservationTimeService)
@@ -134,5 +137,9 @@ class ReservationTimeControllerTest {
                         .param("themeId", "1"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    private static Store store() {
+        return new Store(1L);
     }
 }

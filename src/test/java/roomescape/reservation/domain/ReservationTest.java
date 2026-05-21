@@ -28,7 +28,7 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 
 class ReservationTest {
 
-    private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+    private final ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
     private final Theme theme = new Theme(1L, new Store(1L), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
 
     @Test
@@ -100,7 +100,7 @@ class ReservationTest {
         // given
         // 2025-05-11T10:00:00
         LocalDate date = LocalDate.of(2025, 5, 11);
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(1L, member("브라운"), date, time, theme);
 
         // when
@@ -143,5 +143,9 @@ class ReservationTest {
 
     private static Member member(String nickname) {
         return Member.of(1L, "login1", Password.fromEncoded("password1"), nickname, Role.USER);
+    }
+
+    private static Store store() {
+        return new Store(1L);
     }
 }

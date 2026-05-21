@@ -8,6 +8,7 @@ import static org.springframework.http.HttpStatus.*;
 public enum ReservationTimeErrorCode implements ErrorPolicy {
     INVALID_RESERVATION_TIME_ID("예약 시간 id는 비어 있을 수 없습니다.", BAD_REQUEST),
     INVALID_RESERVATION_TIME("예약 시간은 비어 있을 수 없습니다.", BAD_REQUEST),
+    INVALID_RESERVATION_TIME_STORE("예약 시간이 속한 매장은 비어 있을 수 없습니다.", BAD_REQUEST),
     RESERVATION_TIME_ALREADY_HAS_ID("이미 id가 존재하는 예약 시간입니다.", CONFLICT),
     RESERVATION_TIME_ALREADY_EXISTS("이미 존재하는 예약 시간입니다.", CONFLICT),
     RESERVATION_TIME_NOT_FOUND("존재하지 않는 예약 시간입니다.", NOT_FOUND),

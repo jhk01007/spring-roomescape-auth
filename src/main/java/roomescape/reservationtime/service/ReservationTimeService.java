@@ -9,6 +9,7 @@ import roomescape.reservationtime.infra.dto.ReservationTimeAvailability;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.store.domain.Store;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.LocalDate;
@@ -26,8 +27,8 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
 
     @Transactional
-    public ReservationTime create(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
+    public ReservationTime create(Long storeId, LocalTime startAt) {
+        ReservationTime reservationTime = new ReservationTime(new Store(storeId), startAt);
         validateNotDuplicated(reservationTime);
         try {
             return reservationTimeRepository.save(reservationTime);
@@ -37,7 +38,10 @@ public class ReservationTimeService {
     }
 
     private void validateNotDuplicated(ReservationTime reservationTime) {
-        if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
+        if (reservationTimeRepository.existsByStoreIdAndStartAt(
+                reservationTime.getStore().getId(),
+                reservationTime.getStartAt()
+        )) {
             throw new DomainException(RESERVATION_TIME_ALREADY_EXISTS);
         }
     }

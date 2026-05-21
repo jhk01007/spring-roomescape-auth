@@ -3,6 +3,7 @@ package roomescape.reservationtime.domain;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.ErrorPolicy;
+import roomescape.store.domain.Store;
 
 import java.time.LocalTime;
 
@@ -15,14 +16,22 @@ class ReservationTimeTest {
     @Test
     void 예약_시간이_null이면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new ReservationTime(null),
+                () -> new ReservationTime(store(), null),
                 INVALID_RESERVATION_TIME
         );
     }
 
     @Test
+    void 예약_시간의_매장이_null이면_도메인_예외가_발생한다() {
+        assertDomainException(
+                () -> new ReservationTime(null, LocalTime.of(10, 0)),
+                INVALID_RESERVATION_TIME_STORE
+        );
+    }
+
+    @Test
     void 예약_시간_id가_null이면_도메인_예외가_발생한다() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime reservationTime = new ReservationTime(store(), LocalTime.of(10, 0));
 
         assertDomainException(
                 () -> reservationTime.withId(null),
@@ -32,7 +41,7 @@ class ReservationTimeTest {
 
     @Test
     void 이미_id가_있는_예약_시간에_id를_부여하면_도메인_예외가_발생한다() {
-        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime reservationTime = new ReservationTime(1L, store(), LocalTime.of(10, 0));
 
         assertDomainException(
                 () -> reservationTime.withId(2L),
@@ -46,5 +55,9 @@ class ReservationTimeTest {
                         assertThat(exception.getErrorPolicy()).isEqualTo(errorCode)
                 )
                 .hasMessage(errorCode.message());
+    }
+
+    private Store store() {
+        return new Store(1L);
     }
 }

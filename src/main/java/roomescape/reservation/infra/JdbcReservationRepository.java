@@ -44,6 +44,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
+                    t.store_id AS time_store_id,
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
@@ -79,6 +80,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
+                    t.store_id AS time_store_id,
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
@@ -113,6 +115,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.date,
                     r.deleted_at AS reservation_deleted_at,
                     t.id AS time_id,
+                    t.store_id AS time_store_id,
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
@@ -226,6 +229,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
+                new Store(resultSet.getLong("time_store_id")),
                 resultSet.getTime("start_at").toLocalTime(),
                 toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
         );

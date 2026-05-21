@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 public record AvailableTimeResponse(
         Long id,
+        Long storeId,
         LocalTime startAt,
         boolean isAvailable
 ) {
@@ -13,6 +14,7 @@ public record AvailableTimeResponse(
     public static AvailableTimeResponse from(ReservationTimeAvailability timeAvailability) {
         return new AvailableTimeResponse(
                 timeAvailability.getReservationTime().getId(),
+                timeAvailability.getReservationTime().getStore().getId(),
                 timeAvailability.getReservationTime().getStartAt(),
                 timeAvailability.isAvailable());
     }

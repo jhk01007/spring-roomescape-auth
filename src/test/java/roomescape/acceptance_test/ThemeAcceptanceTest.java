@@ -84,7 +84,7 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
         List<Integer> reservationTimeIds = new ArrayList<>();
         for (int i = 0; i < 13; i++) {
-            reservationTimeIds.add(createReservationTime(new ReservationTimeCreateRequest(LocalTime.of(i, 30))));
+            reservationTimeIds.add(createReservationTime(new ReservationTimeCreateRequest(1L, LocalTime.of(i, 30))));
         }
 
         createReservations(date, reservationTimeIds, themeId, 13);

@@ -19,7 +19,7 @@ public class AdminReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(@RequestBody @Valid ReservationTimeCreateRequest request) {
-        ReservationTime reservationTime = reservationTimeService.create(request.startAt());
+        ReservationTime reservationTime = reservationTimeService.create(request.storeId(), request.startAt());
 
         return ResponseEntity.status(CREATED)
                 .body(ReservationTimeResponse.from(reservationTime));

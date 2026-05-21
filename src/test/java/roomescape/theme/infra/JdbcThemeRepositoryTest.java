@@ -277,14 +277,16 @@ class JdbcThemeRepositoryTest {
     }
 
     private Long insertReservationTime(LocalTime startAt) {
+        insertStore();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at)
-                    VALUES (?)
+                    INSERT INTO reservation_time (store_id, start_at)
+                    VALUES (?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
+            preparedStatement.setLong(1, store().getId());
+            preparedStatement.setString(2, startAt.toString());
             return preparedStatement;
         }, keyHolder);
 

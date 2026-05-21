@@ -20,10 +20,12 @@ CREATE TABLE reservation_time
 (
     id           BIGINT NOT NULL AUTO_INCREMENT,
     start_at     TIME   NOT NULL,
+    store_id    BIGINT       NOT NULL,
     deleted_at   TIMESTAMP,
     delete_token BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
-    CONSTRAINT uk_reservation_time_start_at_delete_token UNIQUE (start_at, delete_token)
+    FOREIGN KEY (store_id) REFERENCES store (id),
+    CONSTRAINT uk_reservation_time_store_id_start_at_delete_token UNIQUE (store_id, start_at, delete_token)
 );
 
 CREATE TABLE member

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.infra.dto.ReservationTimeAvailability;
+import roomescape.store.domain.Store;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -40,7 +41,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query("""
-                SELECT id, start_at, deleted_at
+                SELECT id, store_id, start_at, deleted_at
                 FROM reservation_time
                 WHERE deleted_at IS NULL
                 """, reservationTimeRowMapper);
@@ -49,7 +50,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public Optional<ReservationTime> findById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT id, start_at, deleted_at
+                        SELECT id, store_id, start_at, deleted_at
                         FROM reservation_time
                         WHERE id = ? AND deleted_at IS NULL
                         """, reservationTimeRowMapper, id)
@@ -61,10 +62,15 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     public List<ReservationTimeAvailability> findAllByDateAndThemeIdWithAvailability(LocalDate date, Long themeId) {
         String sql = """
                  SELECT rt.id AS id,
+                        rt.store_id AS store_id,
                         rt.start_at AS start_at,
                         rt.deleted_at AS deleted_at,
                         r.id IS NULL AS available
                  FROM reservation_time rt
+                 INNER JOIN theme th
+                     ON th.id = ?
+                    AND th.store_id = rt.store_id
+                    AND th.deleted_at IS NULL
                  LEFT JOIN reservation r
                      ON r.time_id = rt.id
                     AND r.date = ?
@@ -74,16 +80,16 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 ORDER BY rt.start_at
                 """;
 
-        return jdbcTemplate.query(sql, reservationTimeAvailabilityRowMapper, date, themeId);
+        return jdbcTemplate.query(sql, reservationTimeAvailabilityRowMapper, themeId, date, themeId);
     }
 
     @Override
-    public boolean existsByStartAt(LocalTime startAt) {
+    public boolean existsByStoreIdAndStartAt(Long storeId, LocalTime startAt) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation_time
-                WHERE start_at = ? AND deleted_at IS NULL
-                """, Integer.class, startAt.toString());
+                WHERE store_id = ? AND start_at = ? AND deleted_at IS NULL
+                """, Integer.class, storeId, startAt.toString());
         return count != null && count > 0;
     }
 
@@ -101,12 +107,13 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation_time (start_at)
-                            VALUES (?)
+                            INSERT INTO reservation_time (store_id, start_at)
+                            VALUES (?, ?)
                             """,
                     new String[]{"id"}
             );
-            preparedStatement.setString(1, reservationTime.getStartAt().toString());
+            preparedStatement.setLong(1, reservationTime.getStore().getId());
+            preparedStatement.setString(2, reservationTime.getStartAt().toString());
             return preparedStatement;
         }, keyHolder);
     }
@@ -114,6 +121,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->
             new ReservationTime(
                     resultSet.getLong("id"),
+                    new Store(resultSet.getLong("store_id")),
                     LocalTime.parse(resultSet.getString("start_at")),
                     toLocalDateTime(resultSet.getTimestamp("deleted_at"))
             );
@@ -121,6 +129,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private final RowMapper<ReservationTimeAvailability> reservationTimeAvailabilityRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("id"),
+                new Store(resultSet.getLong("store_id")),
                 LocalTime.parse(resultSet.getString("start_at")),
                 toLocalDateTime(resultSet.getTimestamp("deleted_at"))
         );

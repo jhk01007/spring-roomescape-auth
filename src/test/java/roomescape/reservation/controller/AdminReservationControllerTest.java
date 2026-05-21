@@ -53,7 +53,7 @@ class AdminReservationControllerTest {
     @DisplayName("예약 목록을 조회한다.")
     public void getReservationList() throws Exception {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
         Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
                 new Reservation(1L, member(1L, "브라운"), LocalDate.of(2023, 8, 5), time, theme),
@@ -84,7 +84,7 @@ class AdminReservationControllerTest {
     @DisplayName("예약 목록을 요청한 페이지와 크기로 조회한다.")
     public void getReservationList_withPaging() throws Exception {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime time = new ReservationTime(1L, store(), LocalTime.of(10, 0));
         Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
                 new Reservation(3L, member(3L, "조이"), LocalDate.of(2023, 8, 7), time, theme)

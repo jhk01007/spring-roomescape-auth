@@ -219,7 +219,7 @@ function renderAdmin() {
 
       try {
         const time = state.mode === "live"
-          ? await postJson("/admin/times", { startAt })
+          ? await postJson("/admin/times", { storeId: 1, startAt })
           : { id: getNextId(state.times), startAt };
         state.times = [...state.times, time];
         setAdminMessage("예약 시간이 추가되었습니다.", "ok");

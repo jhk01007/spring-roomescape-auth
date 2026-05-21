@@ -13,12 +13,12 @@ import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.store.domain.Store;
 import roomescape.test_config.web.ControllerTest;
 
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,12 +41,12 @@ class AdminReservationTimeControllerTest {
     @DisplayName("예약 시간을 생성하는 요청을 하면 생성된 예약 시간 정보가 응답으로 반환된다.")
     public void create_success() throws Exception {
         // given
-        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime reservationTime = new ReservationTime(1L, store(), LocalTime.of(10, 0));
 
-        given(reservationTimeService.create(any()))
+        given(reservationTimeService.create(1L, LocalTime.of(10, 0)))
                 .willReturn(reservationTime);
 
-        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
+        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(1L, LocalTime.of(10, 0));
 
         // when then
         MvcResult result = mockMvc.perform(
@@ -64,21 +64,26 @@ class AdminReservationTimeControllerTest {
 
         assertTimeRespose(reservationTimeResponse, reservationTime);
 
-        then(reservationTimeService).should().create(request.startAt());
+        then(reservationTimeService).should().create(request.storeId(), request.startAt());
     }
 
     private static void assertTimeRespose(ReservationTimeResponse reservationTimeResponse, ReservationTime reservationTime) {
         assertThat(reservationTimeResponse).extracting(
                 ReservationTimeResponse::id,
+                ReservationTimeResponse::storeId,
                 ReservationTimeResponse::startAt
-        ).containsExactly(reservationTime.getId(), reservationTime.getStartAt().toString());
+        ).containsExactly(
+                reservationTime.getId(),
+                reservationTime.getStore().getId(),
+                reservationTime.getStartAt().toString()
+        );
     }
 
     @Test
     @DisplayName("예약 시간을 생성하는 요청을 할 때 요청값이 비어있으면 에러가 발생한다.")
     public void create_fail1() throws Exception {
         // given
-        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(null);
+        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(1L, null);
 
         // when then
         mockMvc.perform(
@@ -119,5 +124,9 @@ class AdminReservationTimeControllerTest {
                 .andExpect(status().isNoContent());
 
         then(reservationTimeService).should().delete(id);
+    }
+
+    private Store store() {
+        return new Store(1L);
     }
 }

@@ -53,7 +53,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     private ReservationCreateRequest createScenario1Fixture() throws JsonProcessingException {
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
         return new ReservationCreateRequest(
@@ -84,7 +84,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     private Integer createScenario2Fixture() throws JsonProcessingException {
         LocalTime startAt = LocalTime.of(10, 30);
-        ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(startAt);
+        ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(1L, startAt);
         Integer reservationTimeId = createReservationTime(timeRequest);
 
         ThemeCreateRequest themeRequest = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
@@ -114,7 +114,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     private void createScenario3Fixture() throws JsonProcessingException {
         LocalTime startAt = LocalTime.of(10, 30);
-        ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(startAt);
+        ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(1L, startAt);
         Integer reservationTimeId = createReservationTime(timeRequest);
 
         ThemeCreateRequest themeRequest = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
@@ -135,9 +135,9 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         LocalDate editedDate = LocalDate.of(2026, 10, 15);
 
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(11, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
@@ -169,9 +169,9 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @DisplayName("수정하려는 날짜와 시간에 같은 테마의 예약이 존재하면 에러가 발생한다.")
     public void scenario5() throws JsonProcessingException {
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(11, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
@@ -207,9 +207,9 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         LocalDate reservationDate = LocalDate.of(2026, 10, 14);
 
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(11, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
@@ -239,9 +239,9 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @DisplayName("이미 지난 날짜와 시간으로 예약을 수정할 수 없다.")
     public void scenario7() throws JsonProcessingException {
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(11, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
@@ -271,9 +271,9 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @DisplayName("본인의 예약이 아니면 수정할 수 없다.")
     public void scenario8() throws JsonProcessingException {
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(11, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
@@ -308,7 +308,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     public void scenario9() throws JsonProcessingException {
         String guestName = "brown";
         Integer reservationTimeId = createReservationTime(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 

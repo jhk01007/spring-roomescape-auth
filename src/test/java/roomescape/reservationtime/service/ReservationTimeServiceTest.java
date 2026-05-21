@@ -54,7 +54,7 @@ class ReservationTimeServiceTest {
         insertReservationTime(startAt);
 
         // when, then
-        assertThatThrownBy(() -> reservationTimeService.create(startAt))
+        assertThatThrownBy(() -> reservationTimeService.create(1L, startAt))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(RESERVATION_TIME_ALREADY_EXISTS.message());
     }
@@ -95,18 +95,20 @@ class ReservationTimeServiceTest {
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
+        insertStore();
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at)
-                    VALUES (?)
+                    INSERT INTO reservation_time (store_id, start_at)
+                    VALUES (?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
+            preparedStatement.setLong(1, 1L);
+            preparedStatement.setString(2, startAt.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), startAt);
+        return new ReservationTime(getGeneratedId(keyHolder), new Store(1L), startAt);
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
