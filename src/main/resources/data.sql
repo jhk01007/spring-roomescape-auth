@@ -81,7 +81,8 @@ VALUES (1, 'guest_1', 'guest1', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/
        (55, 'guest_55', 'guest55', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'USER'),
        (56, 'guest_56', 'guest56', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'USER'),
        (57, 'guest_57', 'guest57', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'USER'),
-       (58, 'guest_58', 'guest58', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'USER');
+       (58, 'guest_58', 'guest58', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'USER'),
+       (59, 'admin_1', 'admin1', '$2a$10$yuaKxDYwyLvPhmGl60HxZuJLRgdBXlNYZ4LgbJO/qjtfzdu4bHzGu', 'ADMIN');
 
 INSERT INTO reservation (id, store_id, guest_id, date, time_id, theme_id)
 VALUES (1, 1, 1, '2026-05-13', 1, 1),
@@ -143,6 +144,9 @@ VALUES (1, 1, 1, '2026-05-13', 1, 1),
        (57, 1, 57, '2027-05-06', 2, 11),
        (58, 1, 58, '2027-04-28', 1, 11);
 
+INSERT INTO store_manager(id, member_id, store_id)
+VALUES (1, 59, 1);
+
 ALTER TABLE theme
     ALTER COLUMN id RESTART WITH 13;
 ALTER TABLE store
@@ -150,6 +154,6 @@ ALTER TABLE store
 ALTER TABLE reservation_time
     ALTER COLUMN id RESTART WITH 7;
 ALTER TABLE member
-    ALTER COLUMN id RESTART WITH 59;
+    ALTER COLUMN id RESTART WITH 60;
 ALTER TABLE reservation
     ALTER COLUMN id RESTART WITH 59;

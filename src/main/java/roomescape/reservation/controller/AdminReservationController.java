@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.auth.annotation.LoginMember;
+import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.PageRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -16,9 +18,12 @@ public class AdminReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public ResponseEntity<ReservationListResponse> getAllReservations(@ModelAttribute @Valid PageRequest pageRequest) {
+    public ResponseEntity<ReservationListResponse> getAllReservations(
+            @LoginMember Member manager,
+            @ModelAttribute @Valid PageRequest pageRequest
+    ) {
         return ResponseEntity.ok(
-                ReservationListResponse.from(reservationService.findAllReservations(pageRequest.page(), pageRequest.size())
+                ReservationListResponse.from(reservationService.findManagedStoreReservations(manager, pageRequest.page(), pageRequest.size())
                         .stream()
                         .map(ReservationResponse::from)
                         .toList()));

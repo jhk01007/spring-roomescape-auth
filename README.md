@@ -165,7 +165,7 @@ Content-Type: application/json
 > 토큰이 응답바디로 전달된다.
 ```http
 HTTP/1.1 204
-{
+`{
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
 }
 ```

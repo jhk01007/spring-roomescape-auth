@@ -129,6 +129,29 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("특정 매장의 예약 목록을 페이지 단위로 조회한다.")
+    void findAllByStoreIdWithPaging() {
+        // given
+        Long targetStoreId = 1L;
+        ReservationTime targetTime = insertReservationTime(targetStoreId, LocalTime.of(10, 0));
+        Theme targetTheme = insertTheme(targetStoreId, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), targetTime, targetTheme);
+        Reservation targetReservation = insertReservation("포비", LocalDate.of(2023, 8, 6), targetTime, targetTheme);
+
+        ReservationTime otherTime = insertReservationTime(2L, LocalTime.of(10, 0));
+        Theme otherTheme = insertTheme(2L, "다른 매장 테마", "다른 매장의 테마입니다.", "https://example.com/theme.png");
+        insertReservation("조이", LocalDate.of(2023, 8, 7), otherTime, otherTheme);
+
+        // when
+        List<Reservation> reservations = reservationRepository.findAllByStoreId(targetStoreId, 2, 1);
+
+        // then
+        assertThat(reservations)
+                .extracting(Reservation::getId, reservation -> reservation.getStore().getId(), Reservation::getGuest)
+                .containsExactly(tuple(targetReservation.getId(), targetStoreId, targetReservation.getGuest()));
+    }
+
+    @Test
     @DisplayName("예약자로 예약 정보를 조회한다.")
     public void findByGuest() {
         // given
@@ -402,7 +425,11 @@ class JdbcReservationRepositoryTest {
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
-        insertStore();
+        return insertReservationTime(1L, startAt);
+    }
+
+    private ReservationTime insertReservationTime(Long storeId, LocalTime startAt) {
+        insertStore(storeId, "매장" + storeId);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -410,16 +437,20 @@ class JdbcReservationRepositoryTest {
                     INSERT INTO reservation_time (store_id, start_at)
                     VALUES (?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setLong(1, 1L);
+            preparedStatement.setLong(1, storeId);
             preparedStatement.setString(2, startAt.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), new Store(1L), startAt);
+        return new ReservationTime(getGeneratedId(keyHolder), new Store(storeId), startAt);
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
-        insertStore();
+        return insertTheme(1L, name, description, thumbnail);
+    }
+
+    private Theme insertTheme(Long storeId, String name, String description, String thumbnail) {
+        insertStore(storeId, "매장" + storeId);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -427,21 +458,25 @@ class JdbcReservationRepositoryTest {
                     INSERT INTO theme (store_id, name, description, thumbnail)
                     VALUES (?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setLong(1, 1L);
+            preparedStatement.setLong(1, storeId);
             preparedStatement.setString(2, name);
             preparedStatement.setString(3, description);
             preparedStatement.setString(4, thumbnail);
             return preparedStatement;
         }, keyHolder);
 
-        return new Theme(getGeneratedId(keyHolder), new Store(1L), name, description, thumbnail);
+        return new Theme(getGeneratedId(keyHolder), new Store(storeId), name, description, thumbnail);
     }
 
     private void insertStore() {
+        insertStore(1L, "잠실점");
+    }
+
+    private void insertStore(Long id, String name) {
         jdbcTemplate.update("""
                 MERGE INTO store (id, name) KEY(id)
-                VALUES (1, '잠실점')
-                """);
+                VALUES (?, ?)
+                """, id, name);
     }
 
     private Reservation insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {

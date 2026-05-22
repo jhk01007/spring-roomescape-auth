@@ -12,11 +12,14 @@ import roomescape.theme.domain.Theme;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.store_manager.domain.StoreManager;
+import roomescape.store_manager.domain.repository.StoreManagerRepository;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static roomescape.auth.exception.AuthErrorCode.AUTHORIZATION_ERROR;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 import static roomescape.theme.exception.ThemeErrorCode.*;
@@ -27,6 +30,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final StoreManagerRepository storeManagerRepository;
 
     private final ReservationValidator reservationValidator;
 
@@ -49,6 +53,12 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> findAllReservations(int page, int size) {
         return reservationRepository.findAll(page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findManagedStoreReservations(Member manager, int page, int size) {
+        StoreManager storeManager = getStoreManager(manager);
+        return reservationRepository.findAllByStoreId(storeManager.getStore().getId(), page, size);
     }
 
     @Transactional(readOnly = true)
@@ -100,6 +110,11 @@ public class ReservationService {
     private ReservationTime getReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
+    }
+
+    private StoreManager getStoreManager(Member manager) {
+        return storeManagerRepository.findByMemberId(manager.getId())
+                .orElseThrow(() -> new DomainException(AUTHORIZATION_ERROR));
     }
 
     private void updateReservation(Reservation reservation) {

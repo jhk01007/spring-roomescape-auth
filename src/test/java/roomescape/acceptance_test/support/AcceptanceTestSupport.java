@@ -30,6 +30,7 @@ public abstract class AcceptanceTestSupport {
         setUpDefaultStore();
         beforeAuthenticate();
         authStrategy.authenticate("test123", "password1", "test");
+        setUpDefaultStoreManager("test123");
     }
 
     protected void beforeAuthenticate() {
@@ -40,6 +41,27 @@ public abstract class AcceptanceTestSupport {
                 MERGE INTO store (id, name) KEY(id)
                 VALUES (1, '잠실점')
                 """);
+    }
+
+    private void setUpDefaultStoreManager(String loginId) {
+        Long memberId = jdbcTemplate.queryForObject("""
+                SELECT id
+                FROM member
+                WHERE login_id = ?
+                """, Long.class, loginId);
+
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM store_manager
+                WHERE member_id = ?
+                """, Integer.class, memberId);
+
+        if (count == null || count == 0) {
+            jdbcTemplate.update("""
+                    INSERT INTO store_manager (member_id, store_id)
+                    VALUES (?, 1)
+                    """, memberId);
+        }
     }
 
     @AfterEach

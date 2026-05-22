@@ -29,7 +29,6 @@ public class WebConfig implements WebMvcConfigurer {
             "/reservations/**",
             "/store-managers",
             "/store-managers/**",
-            "/admin",
             "/admin/**"
     );
 
@@ -51,6 +50,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(AUTH_REQUIRED_PATHS);
 
         registry.addInterceptor(adminAuthorizeInterceptor)
-                .addPathPatterns("/admin", "/admin/**");
+                .addPathPatterns("/admin/**");
     }
 }

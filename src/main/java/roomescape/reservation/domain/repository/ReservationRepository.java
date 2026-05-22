@@ -12,6 +12,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAll(int page, int size);
 
+    List<Reservation> findAllByStoreId(Long storeId, int page, int size);
+
     List<Reservation> findByGuestId(Long guestId);
 
     Reservation save(Reservation reservation);

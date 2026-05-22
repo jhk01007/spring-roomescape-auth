@@ -20,6 +20,7 @@ import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.infra.JdbcReservationTimeRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.store.domain.Store;
+import roomescape.store_manager.infra.JdbcStoreManagerRepository;
 import roomescape.theme.infra.JdbcThemeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.test_config.clock.MutableClock;
@@ -32,6 +33,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.groups.Tuple.tuple;
+import static roomescape.auth.exception.AuthErrorCode.AUTHORIZATION_ERROR;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 
@@ -42,6 +45,7 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class,
+        JdbcStoreManagerRepository.class,
         ReservationValidator.class
 })
 class ReservationServiceTest {
@@ -101,6 +105,52 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.cancel(id))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(RESERVATION_NOT_FOUND.message());
+    }
+
+    @Test
+    @DisplayName("매장 관리자는 자신이 관리하는 매장의 예약 목록을 조회한다.")
+    public void findManagedStoreReservations_success() {
+        // given
+        Member manager = insertMember("관리자", Role.ADMIN);
+        insertStoreManager(manager, 1L);
+
+        ReservationTime targetTime = insertReservationTime(1L, LocalTime.of(10, 0));
+        Theme targetTheme = insertTheme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Reservation targetReservation = insertReservation(
+                insertMember("브라운"),
+                LocalDate.of(2026, 10, 11),
+                targetTime,
+                targetTheme
+        );
+
+        ReservationTime otherTime = insertReservationTime(2L, LocalTime.of(10, 0));
+        Theme otherTheme = insertTheme(2L, "다른 매장 테마", "다른 매장의 테마입니다.", "https://example.com/theme.png");
+        insertReservation(
+                insertMember("포비"),
+                LocalDate.of(2026, 10, 11),
+                otherTime,
+                otherTheme
+        );
+
+        // when
+        var reservations = reservationService.findManagedStoreReservations(manager, 1, 20);
+
+        // then
+        assertThat(reservations)
+                .extracting(Reservation::getId, reservation -> reservation.getStore().getId())
+                .containsExactly(tuple(targetReservation.getId(), 1L));
+    }
+
+    @Test
+    @DisplayName("관리 매장이 없는 관리자가 예약 목록을 조회하면 예외가 발생한다.")
+    public void findManagedStoreReservations_fail1() {
+        // given
+        Member manager = insertMember("관리자", Role.ADMIN);
+
+        // when then
+        assertThatThrownBy(() -> reservationService.findManagedStoreReservations(manager, 1, 20))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(AUTHORIZATION_ERROR.message());
     }
 
     @Test
@@ -347,7 +397,11 @@ class ReservationServiceTest {
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
-        insertStore();
+        return insertReservationTime(1L, startAt);
+    }
+
+    private ReservationTime insertReservationTime(Long storeId, LocalTime startAt) {
+        insertStore(storeId, "매장" + storeId);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -355,16 +409,20 @@ class ReservationServiceTest {
                     INSERT INTO reservation_time (store_id, start_at)
                     VALUES (?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setLong(1, 1L);
+            preparedStatement.setLong(1, storeId);
             preparedStatement.setString(2, startAt.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), new Store(1L), startAt);
+        return new ReservationTime(getGeneratedId(keyHolder), new Store(storeId), startAt);
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
-        insertStore();
+        return insertTheme(1L, name, description, thumbnail);
+    }
+
+    private Theme insertTheme(Long storeId, String name, String description, String thumbnail) {
+        insertStore(storeId, "매장" + storeId);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -372,21 +430,25 @@ class ReservationServiceTest {
                     INSERT INTO theme (store_id, name, description, thumbnail)
                     VALUES (?, ?, ?, ?)
                     """, new String[]{"id"});
-            preparedStatement.setLong(1, 1L);
+            preparedStatement.setLong(1, storeId);
             preparedStatement.setString(2, name);
             preparedStatement.setString(3, description);
             preparedStatement.setString(4, thumbnail);
             return preparedStatement;
         }, keyHolder);
 
-        return new Theme(getGeneratedId(keyHolder), new Store(1L), name, description, thumbnail);
+        return new Theme(getGeneratedId(keyHolder), new Store(storeId), name, description, thumbnail);
     }
 
     private void insertStore() {
+        insertStore(1L, "잠실점");
+    }
+
+    private void insertStore(Long id, String name) {
         jdbcTemplate.update("""
                 MERGE INTO store (id, name) KEY(id)
-                VALUES (1, '잠실점')
-                """);
+                VALUES (?, ?)
+                """, id, name);
     }
 
     private Reservation insertReservation(Member guest, LocalDate date, ReservationTime time, Theme theme) {
@@ -409,6 +471,10 @@ class ReservationServiceTest {
     }
 
     private Member insertMember(String nickname) {
+        return insertMember(nickname, Role.USER);
+    }
+
+    private Member insertMember(String nickname, Role role) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -419,11 +485,19 @@ class ReservationServiceTest {
             preparedStatement.setString(1, nickname);
             preparedStatement.setString(2, "login" + System.nanoTime());
             preparedStatement.setString(3, "password1");
-            preparedStatement.setString(4, Role.USER.name());
+            preparedStatement.setString(4, role.name());
             return preparedStatement;
         }, keyHolder);
 
-        return Member.of(getGeneratedId(keyHolder), "login1", Password.fromEncoded("password1"), nickname, Role.USER);
+        return Member.of(getGeneratedId(keyHolder), "login1", Password.fromEncoded("password1"), nickname, role);
+    }
+
+    private void insertStoreManager(Member manager, Long storeId) {
+        insertStore(storeId, "매장" + storeId);
+        jdbcTemplate.update("""
+                INSERT INTO store_manager (member_id, store_id)
+                VALUES (?, ?)
+                """, manager.getId(), storeId);
     }
 
     private Long getGeneratedId(KeyHolder keyHolder) {

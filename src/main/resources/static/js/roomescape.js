@@ -333,8 +333,23 @@ const API_BASE = "";
       window.location.href = "/login";
     }
 
+    function redirectToMainForAdminForbidden() {
+      window.alert("관리자만 접근할 수 있는 페이지입니다.");
+      window.location.href = "/";
+    }
+
     function isAuthorizationError(error) {
       return error instanceof Error && error.code === "AUTHORIZATION_ERROR";
+    }
+
+    function isAuthenticationRequiredError(error) {
+      return error instanceof Error && [
+        "AUTHENTICATION_ERROR",
+        "SESSION_NOT_FOUND",
+        "TOKEN_NOT_FOUND",
+        "EXPIRED_TOKEN",
+        "INVALID_TOKEN"
+      ].includes(error.code);
     }
 
     function clearCurrentUser() {
@@ -604,6 +619,38 @@ const API_BASE = "";
 
     async function getReservationListData(page = state.adminReservationPage, size = state.adminReservationSize) {
       return getJson(`/admin/reservations?page=${page}&size=${size}`);
+    }
+
+    async function guardAdminNavigation(event) {
+      const adminLink = event.target.closest('a[href="/admin"]');
+      if (!adminLink || isAdminPage()) {
+        return;
+      }
+
+      event.preventDefault();
+      if (!state.currentUser) {
+        redirectToLogin();
+        return;
+      }
+
+      try {
+        await getReservationListData(1, 1);
+        window.location.href = "/admin";
+      } catch (error) {
+        if (isAuthorizationError(error)) {
+          redirectToMainForAdminForbidden();
+          return;
+        }
+
+        if (isAuthenticationRequiredError(error)) {
+          clearCurrentUser();
+          updateAuthUi();
+          redirectToLogin();
+          return;
+        }
+
+        showToast("관리자 화면을 확인하지 못했습니다.", endpointMessageOr(error, "다시 시도해주세요."));
+      }
     }
 
     function escapeHtml(value) {
@@ -1351,9 +1398,18 @@ const API_BASE = "";
           renderLoggedOutLookup();
         }
       } catch (error) {
-        if (isAdminPage() && isAuthorizationError(error)) {
-          redirectToLogin();
-          return;
+        if (isAdminPage()) {
+          if (isAuthorizationError(error)) {
+            redirectToMainForAdminForbidden();
+            return;
+          }
+
+          if (isAuthenticationRequiredError(error)) {
+            clearCurrentUser();
+            updateAuthUi();
+            redirectToLogin();
+            return;
+          }
         }
         state.mode = "demo";
         renderDemoFirst();
@@ -1362,6 +1418,8 @@ const API_BASE = "";
     }
 
     function initializeApp() {
+    document.addEventListener("click", guardAdminNavigation);
+
     if (isUserPage()) {
       elements.authActionButton.addEventListener("click", (event) => {
         if (state.currentUser) {

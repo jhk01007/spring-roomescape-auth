@@ -1,6 +1,7 @@
 package roomescape.reservation.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,6 +19,7 @@ import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.store.domain.Store;
+import roomescape.test_config.web.FakeLoginMemberArgumentResolver;
 import roomescape.test_config.web.ControllerTest;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.service.ReservationService;
@@ -29,6 +31,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
@@ -49,6 +52,17 @@ class AdminReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
+    @Autowired
+    private FakeLoginMemberArgumentResolver fakeLoginMemberArgumentResolver;
+
+    private Member manager;
+
+    @BeforeEach
+    void setUp() {
+        manager = Member.of(99L, "admin1", Password.fromEncoded("password1"), "관리자", Role.ADMIN);
+        fakeLoginMemberArgumentResolver.setMember(manager);
+    }
+
     @Test
     @DisplayName("예약 목록을 조회한다.")
     public void getReservationList() throws Exception {
@@ -60,7 +74,7 @@ class AdminReservationControllerTest {
                 new Reservation(2L, member(2L, "포비"), LocalDate.of(2023, 8, 6), time, theme),
                 new Reservation(3L, member(3L, "조이"), LocalDate.of(2023, 8, 7), time, theme)
         );
-        given(reservationService.findAllReservations(1, 20)).willReturn(reservations);
+        given(reservationService.findManagedStoreReservations(manager, 1, 20)).willReturn(reservations);
 
         // when then
         MvcResult result = mockMvc.perform(get("/admin/reservations"))
@@ -77,7 +91,7 @@ class AdminReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .findAllReservations(1, 20);
+                .findManagedStoreReservations(manager, 1, 20);
     }
 
     @Test
@@ -89,7 +103,7 @@ class AdminReservationControllerTest {
         List<Reservation> reservations = List.of(
                 new Reservation(3L, member(3L, "조이"), LocalDate.of(2023, 8, 7), time, theme)
         );
-        given(reservationService.findAllReservations(2, 2)).willReturn(reservations);
+        given(reservationService.findManagedStoreReservations(manager, 2, 2)).willReturn(reservations);
 
         // when then
         MvcResult result = mockMvc.perform(get("/admin/reservations")
@@ -114,7 +128,7 @@ class AdminReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .findAllReservations(2, 2);
+                .findManagedStoreReservations(manager, 2, 2);
     }
 
     @ParameterizedTest
@@ -136,7 +150,7 @@ class AdminReservationControllerTest {
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
         then(reservationService).should(never())
-                .findAllReservations(anyInt(), anyInt());
+                .findManagedStoreReservations(any(Member.class), anyInt(), anyInt());
     }
 
     private static void assertReservationsResponse(ReservationListResponse response) {
