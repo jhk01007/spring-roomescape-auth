@@ -30,6 +30,9 @@ const API_BASE = "";
       adminSelectedThemeId: null,
       adminSelectedTimeId: null,
       adminAvailableTimes: [],
+      adminEditingReservationId: null,
+      adminEditingReservationThemeId: null,
+      adminEditAvailableTimes: [],
       adminReservationPage: 1,
       adminReservationSize: 20,
       adminReservationHasNext: false,
@@ -174,6 +177,14 @@ const API_BASE = "";
       adminReserveSummary: $("#adminReserveSummary"),
       adminReserveButton: $("#adminReserveButton"),
       adminReserveMessage: $("#adminReserveMessage"),
+      adminEditReservationForm: $("#adminEditReservationForm"),
+      adminEditReservationTitle: $("#adminEditReservationTitle"),
+      adminEditReservationMeta: $("#adminEditReservationMeta"),
+      adminEditReservationDate: $("#adminEditReservationDate"),
+      adminEditReservationTime: $("#adminEditReservationTime"),
+      adminEditReservationButton: $("#adminEditReservationButton"),
+      adminEditReservationMessage: $("#adminEditReservationMessage"),
+      adminEditCancelButton: $("#adminEditCancelButton"),
       adminTimeStartAt: $("#adminTimeStartAt"),
       adminMessage: $("#adminMessage"),
       adminReservationList: $("#adminReservationList"),
@@ -1492,11 +1503,21 @@ const API_BASE = "";
         }
       });
       elements.adminReservationList.addEventListener("click", (event) => {
+        const editButton = event.target.closest("[data-edit-admin-reservation-id]");
+        if (editButton) {
+          startAdminEditReservation(Number(editButton.dataset.editAdminReservationId));
+          return;
+        }
+
         const button = event.target.closest("[data-delete-reservation-id]");
         if (button) {
           deleteReservation(Number(button.dataset.deleteReservationId));
         }
       });
+      elements.adminEditReservationForm.addEventListener("submit", editAdminReservation);
+      elements.adminEditCancelButton.addEventListener("click", clearAdminEditReservation);
+      elements.adminEditReservationDate.addEventListener("change", () => loadAdminEditAvailability());
+      elements.adminEditReservationTime.addEventListener("change", syncAdminEditReservationForm);
       elements.adminReservationPageSize.addEventListener("change", async () => {
         state.adminReservationSize = Number(elements.adminReservationPageSize.value);
         state.adminReservationPage = 1;

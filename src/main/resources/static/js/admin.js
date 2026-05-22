@@ -1,4 +1,4 @@
-function renderAdmin() {
+    function renderAdmin() {
       elements.reservationCount.textContent =
         `GET /admin/reservations?page=${state.adminReservationPage}&size=${state.adminReservationSize} · ${state.reservations.length}건`;
       elements.adminThemeCount.textContent = `${state.themes.length}개`;
@@ -101,7 +101,10 @@ function renderAdmin() {
               <span class="list-title">${escapeHtml(reservation.guestName || "예약자")}</span>
               <span class="list-meta">${escapeHtml(formatDate(reservation.date))} · ${escapeHtml(theme?.name || "-")} · ${escapeHtml(normalizeTime(time?.startAt || "-"))}</span>
             </div>
-            <button class="danger-button" type="button" data-delete-reservation-id="${reservation.id}">삭제</button>
+            <div class="row-actions">
+              <button class="secondary-button compact-button" type="button" data-edit-admin-reservation-id="${reservation.id}">수정</button>
+              <button class="danger-button compact-button" type="button" data-delete-reservation-id="${reservation.id}">삭제</button>
+            </div>
           `;
           elements.adminReservationList.appendChild(row);
         });
@@ -183,6 +186,186 @@ function renderAdmin() {
       await loadAdminReservations();
       await loadAdminAvailability();
       renderAdmin();
+    }
+
+    function setAdminEditReservationMessage(text, type = "") {
+      elements.adminEditReservationMessage.textContent = text;
+      elements.adminEditReservationMessage.className = `admin-message${type ? ` ${type}` : ""}`;
+    }
+
+    function syncAdminEditReservationForm() {
+      if (!elements.adminEditReservationForm || elements.adminEditReservationForm.hidden) {
+        return;
+      }
+
+      elements.adminEditReservationButton.disabled = !(
+        state.adminEditingReservationId &&
+        elements.adminEditReservationDate.value &&
+        elements.adminEditReservationTime.value &&
+        !elements.adminEditReservationTime.disabled
+      );
+    }
+
+    function renderAdminEditTimeOptions(times, selectedTimeId = null) {
+      elements.adminEditReservationTime.innerHTML = "";
+      const availableTimes = times.filter((time) => time.isAvailable);
+      if (availableTimes.length === 0) {
+        elements.adminEditReservationTime.innerHTML = `<option value="">예약 가능한 시간 없음</option>`;
+        elements.adminEditReservationTime.disabled = true;
+        syncAdminEditReservationForm();
+        return;
+      }
+
+      elements.adminEditReservationTime.disabled = false;
+      elements.adminEditReservationTime.innerHTML = `<option value="">시간 선택</option>`;
+
+      [...availableTimes]
+        .sort((a, b) => normalizeTime(a.startAt).localeCompare(normalizeTime(b.startAt)))
+        .forEach((time) => {
+          const option = document.createElement("option");
+          option.value = time.id;
+          option.textContent = normalizeTime(time.startAt);
+          elements.adminEditReservationTime.appendChild(option);
+        });
+
+      if (availableTimes.some((time) => time.id === selectedTimeId)) {
+        elements.adminEditReservationTime.value = String(selectedTimeId);
+      }
+      syncAdminEditReservationForm();
+    }
+
+    async function loadAdminEditAvailability(selectedTimeId = null) {
+      const date = elements.adminEditReservationDate.value;
+      const themeId = state.adminEditingReservationThemeId;
+      if (!state.adminEditingReservationId || !date || !themeId) {
+        state.adminEditAvailableTimes = [];
+        renderAdminEditTimeOptions([]);
+        return;
+      }
+
+      elements.adminEditReservationTime.disabled = true;
+      elements.adminEditReservationTime.innerHTML = `<option value="">불러오는 중</option>`;
+      setAdminEditReservationMessage("예약 가능한 시간을 불러오는 중입니다.");
+      syncAdminEditReservationForm();
+
+      try {
+        let times = state.mode === "live"
+          ? (await getJson(`/times/availability?date=${date}&themeId=${themeId}`)).availableTimes || []
+          : getDemoAvailabilityFor(date, themeId);
+
+        const reservation = findReservation(state.adminEditingReservationId);
+        const currentTime = getReservationTime(reservation);
+        if (
+          reservation &&
+          reservation.date === date &&
+          selectedTimeId &&
+          currentTime &&
+          !times.some((time) => time.id === selectedTimeId)
+        ) {
+          times = [{ ...currentTime, isAvailable: true }, ...times];
+        }
+
+        state.adminEditAvailableTimes = times;
+        renderAdminEditTimeOptions(times, selectedTimeId);
+        const hasAvailableTime = times.some((time) => time.isAvailable);
+        setAdminEditReservationMessage(hasAvailableTime ? "" : "예약 가능한 시간이 없습니다.", hasAvailableTime ? "" : "error");
+      } catch (error) {
+        state.adminEditAvailableTimes = [];
+        renderAdminEditTimeOptions([]);
+        setAdminEditReservationMessage(endpointMessageOr(error, "예약 가능한 시간 조회에 실패했습니다."), "error");
+      }
+    }
+
+    async function startAdminEditReservation(id) {
+      const reservation = findReservation(id);
+      if (!reservation) {
+        return;
+      }
+
+      const theme = getReservationTheme(reservation);
+      const time = getReservationTime(reservation);
+      state.adminEditingReservationId = id;
+      state.adminEditingReservationThemeId = getReservationThemeId(reservation);
+      elements.adminEditReservationForm.hidden = false;
+      elements.adminEditReservationTitle.textContent = `예약 수정 #${id}`;
+      elements.adminEditReservationMeta.textContent = `${reservation.guestName || "예약자"} · ${theme?.name || "-"} · ${normalizeTime(time?.startAt || "-")}`;
+      elements.adminEditReservationDate.value = reservation.date;
+      await loadAdminEditAvailability(getReservationTimeId(reservation));
+      syncAdminEditReservationForm();
+      elements.adminEditReservationDate.focus();
+    }
+
+    function clearAdminEditReservation() {
+      state.adminEditingReservationId = null;
+      state.adminEditingReservationThemeId = null;
+      state.adminEditAvailableTimes = [];
+      elements.adminEditReservationForm.hidden = true;
+      elements.adminEditReservationForm.reset();
+      elements.adminEditReservationMeta.textContent = "";
+      elements.adminEditReservationTime.disabled = false;
+      setAdminEditReservationMessage("");
+    }
+
+    function editAdminDemoReservation(id, payload) {
+      const reservation = findReservation(id);
+      if (!reservation) {
+        throw new Error("존재하지 않는 예약입니다.");
+      }
+
+      const themeId = getReservationThemeId(reservation);
+      const duplicated = state.demoReservations.some((item) =>
+        item.id !== id &&
+        item.date === payload.date &&
+        getReservationTimeId(item) === payload.timeId &&
+        getReservationThemeId(item) === themeId
+      );
+      if (duplicated) {
+        throw new Error("이미 존재하는 예약입니다.");
+      }
+
+      return {
+        ...reservation,
+        date: payload.date,
+        timeId: payload.timeId,
+        time: state.times.find((time) => time.id === payload.timeId) || reservation.time
+      };
+    }
+
+    async function editAdminReservation(event) {
+      event.preventDefault();
+      const reservationId = state.adminEditingReservationId;
+      const payload = {
+        date: elements.adminEditReservationDate.value,
+        timeId: Number(elements.adminEditReservationTime.value)
+      };
+
+      if (!reservationId || !payload.date || !payload.timeId) {
+        setAdminEditReservationMessage("날짜와 시간을 모두 선택해주세요.", "error");
+        syncAdminEditReservationForm();
+        return;
+      }
+
+      elements.adminEditReservationButton.disabled = true;
+      setAdminEditReservationMessage("예약을 수정하는 중입니다.");
+
+      try {
+        const editedReservation = state.mode === "live"
+          ? await patchJson(`/admin/reservations/${reservationId}`, payload)
+          : editAdminDemoReservation(reservationId, payload);
+
+        if (state.mode === "demo") {
+          state.demoReservations = replaceReservation(state.demoReservations, editedReservation);
+        }
+        state.reservations = replaceReservation(state.reservations, editedReservation);
+
+        clearAdminEditReservation();
+        showToast("예약이 수정되었습니다.", `${formatDate(editedReservation.date)} · ${normalizeTime(getReservationTime(editedReservation)?.startAt || "")}`);
+        setAdminMessage("예약이 수정되었습니다.", "ok");
+        await syncAfterAdminChange();
+      } catch (error) {
+        setAdminEditReservationMessage(endpointMessageOr(error, "예약 수정에 실패했습니다."), "error");
+        syncAdminEditReservationForm();
+      }
     }
 
     async function createTheme(event) {
@@ -327,6 +510,9 @@ function renderAdmin() {
       try {
         if (state.mode === "live") {
           await deleteJson(`/admin/reservations/${id}`);
+        }
+        if (state.adminEditingReservationId === id) {
+          clearAdminEditReservation();
         }
         state.demoReservations = state.demoReservations.filter((reservation) => reservation.id !== id);
         setAdminMessage("예약이 삭제되었습니다.", "ok");

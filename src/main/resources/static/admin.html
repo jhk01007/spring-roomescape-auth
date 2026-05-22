@@ -136,6 +136,27 @@
                 <h2 id="reservationListTitle" class="admin-panel-title">예약 목록</h2>
                 <span id="reservationCount" class="admin-count">0건</span>
               </div>
+              <form id="adminEditReservationForm" class="admin-edit-form" hidden>
+                <div class="edit-head">
+                  <div class="lookup-title-group">
+                    <h3 id="adminEditReservationTitle" class="admin-panel-title">예약 수정</h3>
+                    <span id="adminEditReservationMeta" class="admin-count"></span>
+                  </div>
+                  <button id="adminEditCancelButton" class="secondary-button" type="button">취소</button>
+                </div>
+                <div class="admin-edit-grid">
+                  <label class="field">
+                    <span class="label">예약 날짜</span>
+                    <input id="adminEditReservationDate" class="date-input" type="date" />
+                  </label>
+                  <label class="field">
+                    <span class="label">예약 가능한 시간</span>
+                    <select id="adminEditReservationTime" class="select-input"></select>
+                  </label>
+                </div>
+                <button id="adminEditReservationButton" class="primary-button" type="submit" disabled>예약 수정</button>
+                <p id="adminEditReservationMessage" class="admin-message"></p>
+              </form>
               <div id="adminReservationList" class="admin-list" aria-label="예약 목록"></div>
               <div class="admin-pagination" aria-label="예약 목록 페이지 이동">
                 <label class="page-size-control">

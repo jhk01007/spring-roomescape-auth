@@ -137,6 +137,26 @@
       scrollbar-width: thin;
     }
 
+    .admin-edit-form {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 14px;
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .admin-edit-form[hidden] {
+      display: none;
+    }
+
+    .admin-edit-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+      gap: 12px;
+      align-items: end;
+      min-width: 0;
+    }
+
     .admin-pagination {
       display: flex;
       align-items: center;

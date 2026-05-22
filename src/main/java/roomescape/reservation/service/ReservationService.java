@@ -80,8 +80,32 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation editManagedStoreReservation(Long reservationId, LocalDate date, Long timeId, Member manager) {
+        StoreManager storeManager = getStoreManager(manager);
+        Reservation reservation = getReservation(reservationId);
+        validateManagedStore(storeManager, reservation);
+
+        ReservationTime changedTime = getReservationTime(timeId);
+        Reservation changedReservation = reservation.changeDateAndTime(date, changedTime);
+
+        reservationValidator.validateAdminEdit(reservation, changedReservation);
+
+        updateReservation(changedReservation);
+
+        return changedReservation;
+    }
+
+    @Transactional
     public void cancel(Long id) {
         cancelReservation(id);
+    }
+
+    @Transactional
+    public void cancelManagedStoreReservation(Long reservationId, Member manager) {
+        StoreManager storeManager = getStoreManager(manager);
+        Reservation reservation = getReservation(reservationId);
+        validateManagedStore(storeManager, reservation);
+        cancelReservation(reservationId);
     }
 
     @Transactional
@@ -115,6 +139,12 @@ public class ReservationService {
     private StoreManager getStoreManager(Member manager) {
         return storeManagerRepository.findByMemberId(manager.getId())
                 .orElseThrow(() -> new DomainException(AUTHORIZATION_ERROR));
+    }
+
+    private void validateManagedStore(StoreManager storeManager, Reservation reservation) {
+        if (!storeManager.getStore().equals(reservation.getStore())) {
+            throw new DomainException(AUTHORIZATION_ERROR);
+        }
     }
 
     private void updateReservation(Reservation reservation) {

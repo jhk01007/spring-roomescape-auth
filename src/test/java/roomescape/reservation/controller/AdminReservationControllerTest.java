@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.vo.Password;
 import roomescape.member.domain.vo.Role;
+import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
@@ -37,6 +38,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -176,6 +178,48 @@ class AdminReservationControllerTest {
     }
 
     @Test
+    @DisplayName("특정 예약의 날짜와 시간을 변경한다.")
+    public void edit_success() throws Exception {
+        // given
+        long id = 1L;
+        ReservationEditRequest request = new ReservationEditRequest(
+                LocalDate.of(2023, 8, 10),
+                2L
+        );
+        ReservationTime changedTime = new ReservationTime(2L, store(), LocalTime.of(12, 0));
+        Theme theme = new Theme(1L, store(), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Reservation reservation = new Reservation(
+                id,
+                member(1L, "브라운"),
+                request.date(),
+                changedTime,
+                theme
+        );
+        given(reservationService.editManagedStoreReservation(id, request.date(), request.timeId(), manager))
+                .willReturn(reservation);
+
+        // when then
+        MvcResult result = mockMvc.perform(patch("/admin/reservations/{id}", id)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ReservationResponse response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ReservationResponse.class
+        );
+
+        assertThat(response)
+                .extracting(ReservationResponse::id, ReservationResponse::date)
+                .containsExactly(id, "2023-08-10");
+
+        then(reservationService).should()
+                .editManagedStoreReservation(id, request.date(), request.timeId(), manager);
+    }
+
+    @Test
     @DisplayName("특정 예약을 취소하는 요청을 한다.")
     public void cancel_success() throws Exception {
         // when then
@@ -185,6 +229,6 @@ class AdminReservationControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        then(reservationService).should().cancel(id);
+        then(reservationService).should().cancelManagedStoreReservation(id, manager);
     }
 }

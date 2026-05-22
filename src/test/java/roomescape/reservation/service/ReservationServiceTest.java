@@ -178,6 +178,50 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("매장 관리자가 자신의 매장 예약을 삭제한다.")
+    public void cancelManagedStoreReservation_success() {
+        // given
+        Member manager = insertMember("관리자", Role.ADMIN);
+        insertStoreManager(manager, 1L);
+        Reservation reservation = insertReservation(
+                insertMember("브라운"),
+                LocalDate.of(2026, 10, 11),
+                insertReservationTime(1L, LocalTime.of(10, 0)),
+                insertTheme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png")
+        );
+
+        // when
+        reservationService.cancelManagedStoreReservation(reservation.getId(), manager);
+
+        // then
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE id = ? AND deleted_at IS NULL
+                """, Integer.class, reservation.getId());
+        assertThat(count).isZero();
+    }
+
+    @Test
+    @DisplayName("다른 매장의 예약을 삭제하려고 하면 예외가 발생한다.")
+    public void cancelManagedStoreReservation_fail1() {
+        // given
+        Member manager = insertMember("관리자", Role.ADMIN);
+        insertStoreManager(manager, 1L);
+        Reservation reservation = insertReservation(
+                insertMember("브라운"),
+                LocalDate.of(2026, 10, 11),
+                insertReservationTime(2L, LocalTime.of(10, 0)),
+                insertTheme(2L, "다른 매장 테마", "다른 매장의 테마입니다.", "https://example.com/theme.png")
+        );
+
+        // when then
+        assertThatThrownBy(() -> reservationService.cancelManagedStoreReservation(reservation.getId(), manager))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(AUTHORIZATION_ERROR.message());
+    }
+
+    @Test
     @DisplayName("해당 예약이 존재하지 않으면 본인의 예약을 삭제할 수 없기 때문에 예외가 발생한다.")
     public void cancelMine_fail1() {
         // given
@@ -249,6 +293,65 @@ class ReservationServiceTest {
         assertThat(editedReservation)
                 .extracting(Reservation::getDate, r -> r.getTime().getId())
                 .containsExactly(editedDate, editedTime.getId());
+    }
+
+    @Test
+    @DisplayName("매장 관리자가 자신의 매장 예약 날짜 및 시간을 수정한다.")
+    public void editManagedStoreReservation_success() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 20));
+
+        Member manager = insertMember("관리자", Role.ADMIN);
+        insertStoreManager(manager, 1L);
+        Reservation reservation = insertReservation(
+                insertMember("브라운"),
+                LocalDate.of(2023, 8, 5),
+                insertReservationTime(1L, LocalTime.of(10, 0)),
+                insertTheme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png")
+        );
+
+        LocalDate editedDate = LocalDate.of(2023, 8, 10);
+        ReservationTime editedTime = insertReservationTime(1L, LocalTime.of(12, 0));
+
+        // when
+        Reservation editedReservation = reservationService.editManagedStoreReservation(
+                reservation.getId(),
+                editedDate,
+                editedTime.getId(),
+                manager
+        );
+
+        // then
+        assertThat(editedReservation)
+                .extracting(Reservation::getDate, r -> r.getTime().getId())
+                .containsExactly(editedDate, editedTime.getId());
+    }
+
+    @Test
+    @DisplayName("다른 매장의 예약을 수정하려고 하면 예외가 발생한다.")
+    public void editManagedStoreReservation_fail1() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 20));
+
+        Member manager = insertMember("관리자", Role.ADMIN);
+        insertStoreManager(manager, 1L);
+        Reservation reservation = insertReservation(
+                insertMember("브라운"),
+                LocalDate.of(2023, 8, 5),
+                insertReservationTime(2L, LocalTime.of(10, 0)),
+                insertTheme(2L, "다른 매장 테마", "다른 매장의 테마입니다.", "https://example.com/theme.png")
+        );
+        ReservationTime editedTime = insertReservationTime(2L, LocalTime.of(12, 0));
+
+        // when then
+        assertThatThrownBy(() -> reservationService.editManagedStoreReservation(
+                reservation.getId(),
+                LocalDate.of(2023, 8, 10),
+                editedTime.getId(),
+                manager
+        ))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(AUTHORIZATION_ERROR.message());
     }
 
     @Test

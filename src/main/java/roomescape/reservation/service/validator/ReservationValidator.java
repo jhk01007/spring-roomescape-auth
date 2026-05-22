@@ -31,6 +31,12 @@ public class ReservationValidator {
         validateNotDuplicatedExceptMine(changed);
     }
 
+    public void validateAdminEdit(Reservation original, Reservation changed) {
+        validateAlreadyStarted(original);
+        validateNotPast(changed);
+        validateNotDuplicatedExceptMine(changed);
+    }
+
     public void validateDelete(Reservation deleted, Member requester) {
         validateIsMyReservation(requester, deleted);
         validateAlreadyStarted(deleted);
