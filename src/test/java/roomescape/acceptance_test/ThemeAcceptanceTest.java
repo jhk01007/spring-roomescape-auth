@@ -5,12 +5,10 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import roomescape.acceptance_test.support.AcceptanceTestSupport;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.test_config.clock.MutableClock;
-import roomescape.test_config.clock.TestClockConfig;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 import java.time.LocalDate;
@@ -21,7 +19,6 @@ import java.util.List;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
-@Import(TestClockConfig.class)
 public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Autowired

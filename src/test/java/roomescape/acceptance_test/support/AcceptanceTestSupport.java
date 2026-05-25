@@ -10,13 +10,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.acceptance_test.support.auth.AuthStrategy;
 import roomescape.acceptance_test.support.auth.TestAuthConfig;
+import roomescape.test_config.clock.MutableClock;
+import roomescape.test_config.clock.TestClockConfig;
+
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Import(TestAuthConfig.class)
+@Import({TestAuthConfig.class, TestClockConfig.class})
+@Sql(value = "/acceptance-cleanup.sql", executionPhase = BEFORE_TEST_METHOD)
 public abstract class AcceptanceTestSupport {
 
     @LocalServerPort
@@ -31,8 +35,12 @@ public abstract class AcceptanceTestSupport {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private MutableClock mutableClock;
+
     @BeforeEach
     void setUpAcceptanceTest() throws JsonProcessingException {
+        mutableClock.reset();
         RestAssured.port = port;
         setUpDefaultStore();
         beforeAuthenticate();
