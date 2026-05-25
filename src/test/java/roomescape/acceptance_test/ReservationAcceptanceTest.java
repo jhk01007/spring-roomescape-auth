@@ -36,14 +36,18 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @DisplayName("예약 생성 후 관리자 페이지에서 예약 목록을 조회한다.")
     public void scenario1() throws JsonProcessingException {
         ReservationCreateRequest reservationRequest = createScenario1Fixture();
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
         Integer reservationId = createReservation(reservationRequest);
 
+        loginAsDefaultAdmin();
         given().log().all()
                 .when()
                 .get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.id", hasItem(reservationId))
+                .body("reservations.guestName", hasItem("brown"))
                 .body("reservations.date", hasItem(reservationRequest.date().toString()))
                 .body("reservations.time.id", hasItem(reservationRequest.timeId().intValue()))
                 .body("reservations.theme.id", hasItem(reservationRequest.themeId().intValue()));
@@ -98,32 +102,38 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     }
 
     @Test
-    @DisplayName("특정 사용자의 이름을 입력해 예약을 조회한다.")
+    @DisplayName("로그인한 사용자는 본인의 예약만 조회한다.")
     public void scenario3() throws JsonProcessingException {
-        createScenario3Fixture();
+        LocalDate reservationDate = LocalDate.of(2026, 10, 14);
+        Integer reservationTimeId = createReservationTime(
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
+        Integer otherReservationTimeId = createReservationTime(
+                new ReservationTimeCreateRequest(1L, LocalTime.of(11, 30)));
+        Integer themeId = createTheme(
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
+        Integer myReservationId = createReservation(new ReservationCreateRequest(
+                reservationDate,
+                reservationTimeId.longValue(),
+                themeId.longValue()));
+
+        registerAndLoginUser("conan123", DEFAULT_PASSWORD, "conan");
+        Integer otherReservationId = createReservation(new ReservationCreateRequest(
+                reservationDate,
+                otherReservationTimeId.longValue(),
+                themeId.longValue()));
+
+        loginAs("brown123", DEFAULT_PASSWORD);
 
         given().log().all()
                 .when()
                 .get("/reservations/me")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservations.guestName", hasItem(any(String.class)));
-    }
-
-    private void createScenario3Fixture() throws JsonProcessingException {
-        LocalTime startAt = LocalTime.of(10, 30);
-        ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(1L, startAt);
-        Integer reservationTimeId = createReservationTime(timeRequest);
-
-        ThemeCreateRequest themeRequest = new ThemeCreateRequest(1L, "테마1", "설명", "섬네일");
-        Integer themeId = createTheme(themeRequest);
-
-        ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
-                LocalDate.of(2026, 10, 14),
-                reservationTimeId.longValue(),
-                themeId.longValue());
-
-        createReservation(reservationRequest);
+                .body("reservations.id", hasItem(myReservationId))
+                .body("reservations.id", not(hasItem(otherReservationId)))
+                .body("reservations.guestName", everyItem(equalTo("brown")));
     }
 
     @Test
@@ -143,6 +153,8 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
                 originalDate,
                 reservationTimeId.longValue(),
                 themeId.longValue());
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
         Integer reservationId = createReservation(reservationRequest);
 
         ReservationEditRequest editRequest = new ReservationEditRequest(
@@ -177,6 +189,8 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
         createReservation(reservationRequest);
 
         ReservationCreateRequest targetReservationRequest = new ReservationCreateRequest(
@@ -215,6 +229,8 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
                 reservationDate,
                 reservationTimeId.longValue(),
                 themeId.longValue());
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
         Integer reservationId = createReservation(reservationRequest);
 
         mutableClock.setFixed(LocalDateTime.of(2026, 10, 14, 10, 31));
@@ -247,6 +263,8 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
         Integer reservationId = createReservation(reservationRequest);
 
         mutableClock.setFixed(LocalDateTime.of(2026, 10, 10, 12, 0));
@@ -275,36 +293,31 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         Integer themeId = createTheme(
                 new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
 
-        ReservationCreateRequest otherReservation = new ReservationCreateRequest(
+        ReservationCreateRequest ownerReservation = new ReservationCreateRequest(
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
-        createReservation(otherReservation);
-
-        ReservationCreateRequest myReservation = new ReservationCreateRequest(
-                LocalDate.of(2026, 10, 15),
-                editedReservationTimeId.longValue(),
-                themeId.longValue());
-        Integer myReservationId = createReservation(myReservation);
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
+        Integer ownerReservationId = createReservation(ownerReservation);
 
         ReservationEditRequest editRequest = new ReservationEditRequest(
-                otherReservation.date(),
-                otherReservation.timeId());
+                LocalDate.of(2026, 10, 15),
+                editedReservationTimeId.longValue());
 
+        registerAndLoginUser("conan123", DEFAULT_PASSWORD, "conan");
         given().log().all()
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(editRequest))
-                .pathParam("id", myReservationId)
+                .pathParam("id", ownerReservationId)
                 .when()
                 .patch("/reservations/{id}")
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(403);
     }
 
     @Test
     @DisplayName("본인의 예약을 삭제한다.")
     public void scenario9() throws JsonProcessingException {
-        String guestName = "brown";
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
         Integer themeId = createTheme(
@@ -314,6 +327,8 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
                 LocalDate.of(2026, 10, 14),
                 reservationTimeId.longValue(),
                 themeId.longValue());
+
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
         Integer reservationId = createReservation(reservationRequest);
 
         given().log().all()
@@ -329,6 +344,40 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.id", not(hasItem(reservationId)));
+    }
+
+    @Test
+    @DisplayName("로그인하지 않은 사용자는 예약을 생성할 수 없다.")
+    public void scenario10() throws JsonProcessingException {
+        Integer reservationTimeId = createReservationTime(
+                new ReservationTimeCreateRequest(1L, LocalTime.of(10, 30)));
+        Integer themeId = createTheme(
+                new ThemeCreateRequest(1L, "테마1", "설명", "섬네일"));
+        ReservationCreateRequest reservationRequest = new ReservationCreateRequest(
+                LocalDate.of(2026, 10, 14),
+                reservationTimeId.longValue(),
+                themeId.longValue());
+
+        clearAuthentication();
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .body(objectMapper.writeValueAsString(reservationRequest))
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @Test
+    @DisplayName("일반 사용자는 관리자 예약 목록을 조회할 수 없다.")
+    public void scenario11() throws JsonProcessingException {
+        registerAndLoginUser("brown123", DEFAULT_PASSWORD, "brown");
+
+        given().log().all()
+                .when()
+                .get("/admin/reservations")
+                .then().log().all()
+                .statusCode(403);
     }
 
     private Integer createReservationTime(ReservationTimeCreateRequest request) throws JsonProcessingException {

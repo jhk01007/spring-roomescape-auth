@@ -3,6 +3,7 @@ package roomescape.acceptance_test.support;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,19 +12,27 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.acceptance_test.support.auth.AuthStrategy;
 import roomescape.acceptance_test.support.auth.TestAuthConfig;
+import roomescape.auth.controller.dto.MemberLoginRequest;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.http.ContentType.JSON;
+import static roomescape.acceptance_test.support.auth.MemberSetup.adminSignUp;
+import static roomescape.acceptance_test.support.auth.MemberSetup.signUp;
+import static roomescape.auth.interceptor.JwtAuthInterceptor.AUTHORIZATION_HEADER;
+import static roomescape.auth.interceptor.JwtAuthInterceptor.AUTHORIZATION_PREFIX;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Import(TestAuthConfig.class)
 public abstract class AcceptanceTestSupport {
 
+    protected static final String DEFAULT_ADMIN_LOGIN_ID = "test123";
+    protected static final String DEFAULT_PASSWORD = "password1";
+    protected static final String DEFAULT_ADMIN_NICKNAME = "test";
+
     @LocalServerPort
     protected int port;
-
-    @Autowired
-    protected AuthStrategy authStrategy;
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -36,8 +45,7 @@ public abstract class AcceptanceTestSupport {
         RestAssured.port = port;
         setUpDefaultStore();
         beforeAuthenticate();
-        authStrategy.authenticate("test123", "password1", "test");
-        setUpDefaultStoreManager("test123");
+        registerAndLoginAdmin(DEFAULT_ADMIN_LOGIN_ID, DEFAULT_PASSWORD, DEFAULT_ADMIN_NICKNAME);
     }
 
     protected void beforeAuthenticate() {
@@ -48,6 +56,49 @@ public abstract class AcceptanceTestSupport {
                 MERGE INTO store (id, name) KEY(id)
                 VALUES (1, '잠실점')
                 """);
+    }
+
+    protected void registerAndLoginUser(String loginId, String password, String nickname) throws JsonProcessingException {
+        clearAuthentication();
+        signUp(loginId, password, nickname);
+        loginAs(loginId, password);
+    }
+
+    protected void registerAndLoginAdmin(String loginId, String password, String nickname) throws JsonProcessingException {
+        clearAuthentication();
+        adminSignUp(loginId, password, nickname);
+        loginAs(loginId, password);
+        setUpDefaultStoreManager(loginId);
+    }
+
+    protected void loginAsDefaultAdmin() throws JsonProcessingException {
+        loginAs(DEFAULT_ADMIN_LOGIN_ID, DEFAULT_PASSWORD);
+    }
+
+    protected void loginAs(String loginId, String password) throws JsonProcessingException {
+        clearAuthentication();
+        String token = tokenLogin(loginId, password);
+        RestAssured.requestSpecification = new RequestSpecBuilder()
+                .addHeader(AUTHORIZATION_HEADER, AUTHORIZATION_PREFIX + token)
+                .setContentType(JSON)
+                .build();
+    }
+
+    protected void clearAuthentication() {
+        RestAssured.requestSpecification = null;
+    }
+
+    private String tokenLogin(String loginId, String password) throws JsonProcessingException {
+        return given().log().all()
+                .contentType(JSON)
+                .body(objectMapper.writeValueAsString(new MemberLoginRequest(loginId, password)))
+                .when()
+                .post("/auth/mobile/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getString("accessToken");
     }
 
     private void setUpDefaultStoreManager(String loginId) {
