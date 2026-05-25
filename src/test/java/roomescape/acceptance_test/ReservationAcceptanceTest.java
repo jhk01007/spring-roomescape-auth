@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import roomescape.acceptance_test.support.AcceptanceTest;
 import roomescape.acceptance_test.support.AcceptanceTestSupport;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
@@ -22,7 +21,6 @@ import java.time.LocalTime;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@AcceptanceTest
 @Import(TestClockConfig.class)
 public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 

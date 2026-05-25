@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.acceptance_test.support.AcceptanceTest;
 import roomescape.acceptance_test.support.AcceptanceTestSupport;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
@@ -16,7 +15,6 @@ import java.time.LocalTime;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@AcceptanceTest
 public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
