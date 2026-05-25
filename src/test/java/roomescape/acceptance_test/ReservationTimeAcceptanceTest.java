@@ -42,7 +42,7 @@ public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
 
         createReservationTime(request); // 1차 생성
 
-        // 중복된 시간 생성 시도 -> 400
+        // 중복된 시간 생성 시도 -> 409
         given()
                 .log().all()
                 .contentType(ContentType.JSON)
